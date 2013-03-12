@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testData>
+	<testInputData>
+		<testValue>Hello World!</testValue>
+		<testValue>redefinition not possible</testValue>
+	</testInputData>
+	<testOutputData>
+	</testOutputData>
+</testData>

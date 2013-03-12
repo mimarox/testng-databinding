@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testData>
+	<dataSet>
+		<testInputData>
+			<testBean>
+				<testEnum>one</testEnum>
+				<testString>Hello World!</testString>
+				<testDouble>5.5</testDouble>
+				<testBoolean>true</testBoolean>
+				<testBoolean>false</testBoolean>
+				<testBoolean>true</testBoolean>
+				<innerTestBean>
+					<testValue>test value</testValue>
+				</innerTestBean>
+				<testBean>
+					<testValue>list entry 1</testValue>
+				</testBean>
+				<testBean>
+					<testValue>list entry 2</testValue>
+				</testBean>
+				<testBean>
+					<testValue>list entry 3</testValue>
+				</testBean>
+			</testBean>
+		</testInputData>
+	</dataSet>
+	<dataSet>
+		<testInputData>
+			<testBean />
+		</testInputData>
+	</dataSet>
+</testData>
