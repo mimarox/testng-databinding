@@ -1,0 +1,20 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.testng.databinding</groupId>
+		<artifactId>testng-databinding</artifactId>
+		<version>1.0</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<artifactId>testng-databinding-xml</artifactId>
+	<name>TestNG DataBinding XML</name>
+	<description>Extension for loading data from XML files.</description>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.testng.databinding</groupId>
+			<artifactId>testng-databinding-core</artifactId>
+			<version>1.0</version>
+		</dependency>
+	</dependencies>
+</project>

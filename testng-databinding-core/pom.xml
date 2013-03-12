@@ -1,0 +1,30 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.testng.databinding</groupId>
+		<artifactId>testng-databinding</artifactId>
+		<version>1.0</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<artifactId>testng-databinding-core</artifactId>
+	<name>TestNG DataBinding Core</name>
+	<description>Data binding framework core</description>
+	<dependencies>
+		<dependency>
+			<groupId>net.sf.testng.databinding</groupId>
+			<artifactId>testng-databinding-util</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.8</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.extcos</groupId>
+			<artifactId>extcos</artifactId>
+			<version>0.4b</version>
+		</dependency>
+	</dependencies>
+</project>
