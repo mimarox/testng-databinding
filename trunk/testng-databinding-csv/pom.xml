@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>net.sf.testng.databinding</groupId>
+		<groupId>net.sf.testngdatabind</groupId>
 		<artifactId>testng-databinding</artifactId>
-		<version>1.0</version>
+		<version>1.0-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>testng-databinding-csv</artifactId>
@@ -12,9 +12,9 @@
 	<description>CSV support for the framework</description>
 	<dependencies>
 		<dependency>
-			<groupId>net.sf.testng.databinding</groupId>
+			<groupId>net.sf.testngdatabind</groupId>
 			<artifactId>testng-databinding-core</artifactId>
-			<version>1.0</version>
+			<version>1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.opencsv</groupId>
