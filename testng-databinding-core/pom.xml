@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>net.sf.testngdatabind</groupId>
 		<artifactId>testng-databinding</artifactId>
-		<version>1.0</version>
+		<version>1.1-SNAPSHOT</version>
 		<relativePath>..</relativePath>
 	</parent>
 	<artifactId>testng-databinding-core</artifactId>
@@ -13,7 +13,7 @@
 		<dependency>
 			<groupId>net.sf.testngdatabind</groupId>
 			<artifactId>testng-databinding-util</artifactId>
-			<version>1.0</version>
+			<version>1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>

@@ -7,7 +7,7 @@
   </parent>
   <groupId>net.sf.testngdatabind</groupId>
   <artifactId>testng-databinding</artifactId>
-  <version>1.0</version>
+  <version>1.1-SNAPSHOT</version>
   <packaging>pom</packaging>
   <name>TestNG DataBinding Parent POM</name>
   <description>Parent POM for a data binding framework targeting TestNG</description>
@@ -21,9 +21,9 @@
   </licenses>
   <inceptionYear>2010</inceptionYear>
   <scm>
-    <connection>scm:svn:http://svn.code.sf.net/p/testngdatabind/code/tags/testng-databinding-1.0</connection>
-    <developerConnection>scm:svn:https://svn.code.sf.net/p/testngdatabind/code/tags/testng-databinding-1.0</developerConnection>
-    <url>https://sourceforge.net/p/testngdatabind/code/tags/testng-databinding-1.0</url>
+    <connection>scm:svn:http://svn.code.sf.net/p/testngdatabind/code/trunk</connection>
+    <developerConnection>scm:svn:https://svn.code.sf.net/p/testngdatabind/code/trunk</developerConnection>
+    <url>https://sourceforge.net/p/testngdatabind/code/</url>
   </scm>
   <developers>
     <developer>
