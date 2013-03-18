@@ -94,7 +94,7 @@ public class GenericDataProvider {
 	private GenericDataProvider() {
 	}
 
-	private static DataProviderStrategiesMap getStrategies() {
+	private synchronized static DataProviderStrategiesMap getStrategies() {
 		if (strategies == null) {
 			strategies = new DataProviderStrategiesMap();
 
