@@ -15,10 +15,10 @@ import net.sf.testng.databinding.util.MethodParameter;
 import net.sf.testng.databinding.util.Types;
 
 
-public class HeaderNameFileLinkingMappingStrategy extends HeaderNameMappingStrategy {
+public class HeaderNameFileLinkingMapper extends HeaderNameMapper {
 	private final String linkingColumnPrefix;
 
-	public HeaderNameFileLinkingMappingStrategy(final List<MethodParameter> parameters, final Properties properties) {
+	public HeaderNameFileLinkingMapper(final List<MethodParameter> parameters, final Properties properties) {
 		super(parameters, properties);
 		this.linkingColumnPrefix = properties.getProperty("linkingColumnPrefix", "link_");
 	}
@@ -143,7 +143,7 @@ public class HeaderNameFileLinkingMappingStrategy extends HeaderNameMappingStrat
 
 			final List<MethodParameter> parameters = this.createParameters(parameter);
 
-			final CsvDataProviderStrategy provider = new CsvDataProviderStrategy(parameters, properties);
+			final CsvDataSource provider = new CsvDataSource(parameters, properties);
 			while (provider.hasNext()) {
 				list.add(provider.next()[0]);
 			}

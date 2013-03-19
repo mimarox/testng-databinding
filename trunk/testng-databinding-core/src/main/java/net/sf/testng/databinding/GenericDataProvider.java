@@ -37,7 +37,7 @@ import org.testng.annotations.DataProvider;
  * provides a static @{@link DataProvider} annotated method ({@link #getDataProvider(Method)}) which
  * returns an {@link Iterator} over the data for the test method invocations.
  * <p>
- * To use the GenericDataProvider annotate your test method with the @{@link UseGenericDataProvider}
+ * To use the GenericDataProvider annotate your test method with the @{@link DataBinding}
  * annotation and add the {@link TestAnnotationTransformer} class as a listener to your testng.xml
  * file like so:
  * 
@@ -67,61 +67,63 @@ import org.testng.annotations.DataProvider;
  * that particular specification pertains to.
  * <p>
  * However both location and name of the .data.properties file and the property key prefix for a
- * method can be specified explicitly by annotating the test method with @{@link DataProperties}.
+ * method can be specified explicitly by annotating the test method with @{@link DataBinding} and
+ * setting the parameters it provides.
  * <p>
  * The keys making up a particular data source specification and which of those keys may be required
- * or optional depends on the data provider strategy used. The only commonly required key is
- * <code>strategy</code> defining that data provider strategy, and thereby the kind of data source
- * which the test data is to be retrieved from. Possible values for currently supported data
- * provider strategies are
- * <code>CSV, csv, CSV-file-at-once, csv-file-at-once, properties, XML</code> and
- * <code>xml</code>. For more on data provider strategies and their names see
- * {@link DataProviderStrategy} and {@link DataProviderStrategyNames}.
+ * or optional depends on the data source used. The only commonly required key is
+ * <code>dataSource</code> defining the kind of data source which the test data is to be retrieved from.
+ * Possible values for currently supported data sources are <code>csv, csv-file-at-once, properties</code>
+ * and <code>xml</code>. For more on data sources and their names see {@link IDataSource} and
+ * {@link DataSource}.
  * <p>
- * Since the various data provider strategies are organized as plug-ins for the TestNG Data Binding
+ * Since the various data sources are organized as plug-ins for the TestNG Data Binding
  * framework, make sure you've got the ones you need on your build path or dependencies list
  * alongside the core component.
  * 
  * @author Matthias Rothe
  */
 public class GenericDataProvider {
-	private static class DataProviderStrategiesMap extends HashMap<String, Class<? extends DataProviderStrategy>> {
+	private static class DataSourcesMap extends HashMap<String, Class<? extends IDataSource>> {
 		private static final long serialVersionUID = -1357728940375321662L;
 	}
 
-	private static DataProviderStrategiesMap strategies;
+	private static final String DATA_SOURCE_KEY = "dataSource";
+
+	@Deprecated
+	private static final String STRATEGY_KEY = "strategy";
+
+	private static DataSourcesMap dataSources;
 
 	private GenericDataProvider() {
 	}
 
-	private synchronized static DataProviderStrategiesMap getStrategies() {
-		if (strategies == null) {
-			strategies = new DataProviderStrategiesMap();
+	private synchronized static DataSourcesMap getDataSources() {
+		if (dataSources == null) {
+			dataSources = new DataSourcesMap();
 
-			final Set<Class<? extends DataProviderStrategy>> classes = new HashSet<Class<? extends DataProviderStrategy>>();
+			final Set<Class<? extends IDataSource>> classes = new HashSet<Class<? extends IDataSource>>();
 
 			final ComponentScanner scanner = new ComponentScanner();
 			scanner.getClasses(new ComponentQuery() {
 				@Override
 				protected void query() {
 					select().from("net.sf.testng.databinding")
-						.andStore(thoseImplementing(DataProviderStrategy.class).into(classes)).returning(none());
+						.andStore(thoseImplementing(IDataSource.class).into(classes)).returning(none());
 				}
 			});
 
-			for (final Class<? extends DataProviderStrategy> clazz : classes) {
-				if (clazz.isAnnotationPresent(DataProviderStrategyNames.class)) {
-					final DataProviderStrategyNames names = clazz.getAnnotation(DataProviderStrategyNames.class);
-					for (final String name : names.value()) {
-						strategies.put(name, clazz);
-					}
+			for (final Class<? extends IDataSource> clazz : classes) {
+				if (clazz.isAnnotationPresent(DataSource.class)) {
+					final DataSource dataSource = clazz.getAnnotation(DataSource.class);
+					dataSources.put(dataSource.name().toLowerCase(), clazz);
 				} else {
-					strategies.put(clazz.getSimpleName(), clazz);
+					dataSources.put(clazz.getSimpleName(), clazz);
 				}
 			}
 		}
 
-		return strategies;
+		return dataSources;
 	}
 
 	/**
@@ -148,19 +150,19 @@ public class GenericDataProvider {
 		Class<?> declaringClass = method.getDeclaringClass();
 		String propertiesPrefix = method.getName();
 
-		if (method.isAnnotationPresent(DataProperties.class)) {
-			final DataProperties dp = method.getAnnotation(DataProperties.class);
+		if (method.isAnnotationPresent(DataBinding.class)) {
+			final DataBinding dataBinding = method.getAnnotation(DataBinding.class);
 
-			if (dp.declaringClass() != Object.class && dp.declaringClass() != declaringClass) {
-				declaringClass = dp.declaringClass();
+			if (dataBinding.declaringClass() != Object.class && dataBinding.declaringClass() != declaringClass) {
+				declaringClass = dataBinding.declaringClass();
 			}
 
-			if (dp.propertiesPrefix() != propertiesPrefix) {
-				propertiesPrefix = dp.propertiesPrefix();
+			if (dataBinding.propertiesPrefix() != propertiesPrefix) {
+				propertiesPrefix = dataBinding.propertiesPrefix();
 			}
 
-			if (dp.prefixPreprocessor() != DoNothingPropertiesPrefixPreprocessor.class) {
-				PropertiesPrefixPreprocessor preprocessor = dp.prefixPreprocessor().newInstance();
+			if (dataBinding.prefixPreprocessor() != DoNothingPropertiesPrefixPreprocessor.class) {
+				PropertiesPrefixPreprocessor preprocessor = dataBinding.prefixPreprocessor().newInstance();
 				propertiesPrefix = preprocessor.process(propertiesPrefix);
 			}
 		}
@@ -169,7 +171,7 @@ public class GenericDataProvider {
 		final Properties dataProperties = loadDataProperties(declaringClass, propertiesPrefix);
 		checkProperties(dataProperties);
 
-		return getDataProvider(parameters, dataProperties);
+		return getDataSource(parameters, dataProperties);
 	}
 
 	private static void checkConfiguration(final List<MethodParameter> parameters) {
@@ -228,24 +230,28 @@ public class GenericDataProvider {
 	}
 
 	private static void checkProperties(final Properties dataProperties) {
-		if (!dataProperties.containsKey("strategy")) {
-			throw new MissingPropertiesException("strategy");
+		if (!dataProperties.containsKey(DATA_SOURCE_KEY)) {
+			if (dataProperties.containsKey(STRATEGY_KEY)) {
+				throw new MissingPropertiesException(DATA_SOURCE_KEY + " (You provided the " + STRATEGY_KEY
+						+ " property which has been deprecated. Please use the " + DATA_SOURCE_KEY
+						+ " property instead.)");
+			}
+			throw new MissingPropertiesException(DATA_SOURCE_KEY);
 		}
 
-		final String strategy = dataProperties.getProperty("strategy");
+		final String dataSource = dataProperties.getProperty(DATA_SOURCE_KEY).toLowerCase();
 
-		if (!getStrategies().containsKey(strategy)) {
-			throw new UnsupportedDataProviderStrategyException(strategy);
+		if (!getDataSources().containsKey(dataSource)) {
+			throw new UnsupportedDataProviderStrategyException(dataProperties.getProperty(DATA_SOURCE_KEY));
 		}
 	}
 
-	private static Iterator<Object[]> getDataProvider(final List<MethodParameter> parameters,
-			final Properties dataProperties) throws Exception {
-		final Class<? extends DataProviderStrategy> strategyClass = getStrategies().get(
-			dataProperties.getProperty("strategy"));
+	private static IDataSource getDataSource(final List<MethodParameter> parameters, final Properties dataProperties)
+			throws Exception {
+		final Class<? extends IDataSource> strategyClass = getDataSources().get(
+			dataProperties.getProperty(DATA_SOURCE_KEY).toLowerCase());
 		final ConstructorMatcher matcher = new MethodParametersAndPropertiesConstructorMatcher();
-		final Constructor<DataProviderStrategy> constructor = Constructors.getMatchingConstructor(strategyClass,
-			matcher);
+		final Constructor<IDataSource> constructor = Constructors.getMatchingConstructor(strategyClass, matcher);
 		return constructor.newInstance(parameters, dataProperties);
 	}
 

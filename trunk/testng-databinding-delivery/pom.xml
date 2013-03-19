@@ -1,0 +1,105 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>net.sf.testngdatabind</groupId>
+		<artifactId>testng-databinding</artifactId>
+		<version>1.1-SNAPSHOT</version>
+		<relativePath>..</relativePath>
+	</parent>
+	<artifactId>testng-databinding-delivery</artifactId>
+	<name>TestNG DataBinding - Delivery Builder</name>
+	<description>Module to build delivery packages.</description>
+	<properties>
+		<delivery-version>${project.version}</delivery-version>
+	</properties>
+	<dependencies>
+		<!-- JAR Files -->
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-util</artifactId>
+			<version>${delivery-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-core</artifactId>
+			<version>${delivery-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-csv</artifactId>
+			<version>${delivery-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-properties</artifactId>
+			<version>${delivery-version}</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-xml</artifactId>
+			<version>${delivery-version}</version>
+		</dependency>
+		
+		<!-- Sources -->		
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-util</artifactId>
+			<version>${delivery-version}</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-core</artifactId>
+			<version>${delivery-version}</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-csv</artifactId>
+			<version>${delivery-version}</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-properties</artifactId>
+			<version>${delivery-version}</version>
+			<classifier>sources</classifier>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.testngdatabind</groupId>
+			<artifactId>testng-databinding-xml</artifactId>
+			<version>${delivery-version}</version>
+			<classifier>sources</classifier>
+		</dependency>
+	</dependencies>
+	<profiles>
+		<profile>
+			<id>sourceforge</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<configuration>
+							<descriptors>
+								<descriptor>src/main/assembly/sourceforge.xml</descriptor>
+							</descriptors>
+						</configuration>
+						<executions>
+							<execution>
+								<id>make-assembly</id> <!-- this is used for inheritance merges -->
+								<phase>package</phase> <!-- bind to the packaging phase -->
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

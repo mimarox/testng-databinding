@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
-import net.sf.testng.databinding.AbstractDataProviderStrategy;
-import net.sf.testng.databinding.DataProviderStrategyNames;
+import net.sf.testng.databinding.AbstractDataSource;
+import net.sf.testng.databinding.DataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.error.ErrorCollector;
@@ -28,8 +28,8 @@ import net.sf.testng.databinding.util.MethodParameter;
 import net.sf.testng.databinding.util.Types;
 
 
-@DataProviderStrategyNames("properties")
-public class PropertiesDataProviderStrategy extends AbstractDataProviderStrategy {
+@DataSource(name = "properties")
+public class PropertiesDataSource extends AbstractDataSource {
 	private final Properties data;
 	private final String inputValuePrefix;
 	private final String outputValuePrefix;
@@ -38,7 +38,7 @@ public class PropertiesDataProviderStrategy extends AbstractDataProviderStrategy
 	private final List<MethodParameter> outputParameters = new ArrayList<MethodParameter>();
 	private boolean returnedData = false;
 
-	public PropertiesDataProviderStrategy(final List<MethodParameter> parameters, final Properties properties) throws Exception {
+	public PropertiesDataSource(final List<MethodParameter> parameters, final Properties properties) throws Exception {
 		checkProperties(properties);
 		inputValuePrefix = properties.getProperty("inputValuePrefix", "in_");
 		outputValuePrefix = properties.getProperty("outputValuePrefix", "out_");

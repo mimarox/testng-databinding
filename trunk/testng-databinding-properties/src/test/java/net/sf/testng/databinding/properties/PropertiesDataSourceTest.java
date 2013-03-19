@@ -11,7 +11,7 @@ import java.util.Properties;
 import net.sf.testng.databinding.GenericDataProvider;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
-import net.sf.testng.databinding.properties.PropertiesDataProviderStrategy;
+import net.sf.testng.databinding.properties.PropertiesDataSource;
 import net.sf.testng.databinding.properties.beans.TestBean;
 import net.sf.testng.databinding.properties.beans.TestEnum;
 import net.sf.testng.databinding.util.MethodParameter;
@@ -20,7 +20,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 
-public class PropertiesDataProviderStrategyTest {
+public class PropertiesDataSourceTest {
 	private Method methodParametersCreator;
 
 	@BeforeClass
@@ -36,7 +36,7 @@ public class PropertiesDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/primitive.properties");
 
-		final PropertiesDataProviderStrategy provider = new PropertiesDataProviderStrategy(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { "Hello World!", 0.6 });
@@ -50,7 +50,7 @@ public class PropertiesDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/primitivesAndEnum.properties");
 
-		final PropertiesDataProviderStrategy provider = new PropertiesDataProviderStrategy(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { 5, TestEnum.one, true });
@@ -64,7 +64,7 @@ public class PropertiesDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/beanAllValuesSet.properties");
 
-		final PropertiesDataProviderStrategy provider = new PropertiesDataProviderStrategy(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { new TestBean("Hello World!", 10, 5.3f, TestEnum.one) });
@@ -78,7 +78,7 @@ public class PropertiesDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/beanSomeValuesSet.properties");
 
-		final PropertiesDataProviderStrategy provider = new PropertiesDataProviderStrategy(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { new TestBean("Hello World!", 0, 5.3f, null) });

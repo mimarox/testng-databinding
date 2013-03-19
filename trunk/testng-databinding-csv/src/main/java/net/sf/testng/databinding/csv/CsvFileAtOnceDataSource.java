@@ -7,8 +7,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-import net.sf.testng.databinding.AbstractDataProviderStrategy;
-import net.sf.testng.databinding.DataProviderStrategyNames;
+import net.sf.testng.databinding.AbstractDataSource;
+import net.sf.testng.databinding.DataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.error.ErrorCollector;
@@ -17,21 +17,20 @@ import net.sf.testng.databinding.error.MultipleConfigurationErrorsException;
 import net.sf.testng.databinding.util.MethodParameter;
 import net.sf.testng.databinding.util.Types;
 
-
 /**
  * Reads a whole CSV file into the first and only object contained in the first and only Object
  * array returned by calling {@link #next()}. This object needs to be a {@link List} of either
  * primitives as defined by {@link Types#isPrimitiveType(Type)} or objects of some Java Bean type.
  * <p>
- * Supposedly using this strategy only makes sense if the test method getting its data this way has
+ * Supposedly using this data source only makes sense if the test method getting its data this way has
  * just one fixed way of input and a predefined set of expected results. Then the list will contain
  * exactly these results as read from the CSV file.
  * <p>
- * The default mapper for this data provider strategy is the {@link HeaderNameMappingStrategy}. It
+ * The default mapper for this data source is the {@link HeaderNameMapper}. It
  * may be overridden by the mapper property.
  * <p>
  * The following table gives an overview of the required and optional data property keys for this
- * data provider strategy.
+ * data source.
  * <p>
  * <table border="1">
  * <tr>
@@ -42,8 +41,8 @@ import net.sf.testng.databinding.util.Types;
  * <td><b>Required</b></td>
  * </tr>
  * <tr>
- * <td>strategy</td>
- * <td><code>CSV-file-at-once</code>, <code>csv-file-at-once</code></td>
+ * <td>dataSource</td>
+ * <td><code>csv-file-at-once</code></td>
  * <td>N/A</td>
  * <td>The name of this data provider strategy</td>
  * <td>Yes</td>
@@ -59,9 +58,12 @@ import net.sf.testng.databinding.util.Types;
  * <tr>
  * <td>mapper</td>
  * <td>The fully qualified class name of a class<br>
- * implementing the {@link MappingStrategy} interface</td>
- * <td>net.sf.testng.databinding<br>
- * .csv.HeaderNameMappingStrategy</td>
+ * extending the {@link Mapper} abstract class<br>
+ * or one of the short names for the predefined<br>
+ * mappers:<br><br>
+ * <code>headerNameMapper</code><br>
+ * <code>headerNameFileLinkingMapper</code></td>
+ * <td><code>headerName</code></td>
  * <td>The mapper implementation defining how the data within the<br>
  * CSV source file will be mapped to the test method parameters</td>
  * <td>No</td>
@@ -142,7 +144,7 @@ import net.sf.testng.databinding.util.Types;
  * of inputColumnPrefix and outputColumnPrefix</td>
  * <td>link_</td>
  * <td>The prefix to signify the linking column. Only applicable if the<br>
- * {@link HeaderNameFileLinkingMappingStrategy} is used as the<br>
+ * {@link HeaderNameFileLinkingMapper} is used as the<br>
  * mapper</td>
  * <td>No</td>
  * </tr>
@@ -150,9 +152,9 @@ import net.sf.testng.databinding.util.Types;
  * 
  * @author Matthias Rothe
  */
-@DataProviderStrategyNames({ "CSV-file-at-once", "csv-file-at-once" })
-public class CsvFileAtOnceDataProviderStrategy extends AbstractDataProviderStrategy {
-	private final CsvDataProviderStrategy delegate;
+@DataSource(name = "csv-file-at-once")
+public class CsvFileAtOnceDataSource extends AbstractDataSource {
+	private final CsvDataSource delegate;
 
 	/**
 	 * Creates a new object of this class.
@@ -164,13 +166,13 @@ public class CsvFileAtOnceDataProviderStrategy extends AbstractDataProviderStrat
 	 * @throws Exception
 	 *             if anything goes wrong during initialization
 	 */
-	public CsvFileAtOnceDataProviderStrategy(final List<MethodParameter> parameters, final Properties properties)
+	public CsvFileAtOnceDataSource(final List<MethodParameter> parameters, final Properties properties)
 			throws Exception {
 		this.checkProperties(properties);
 		this.checkParameters(parameters);
 		final List<MethodParameter> adjustedParameters = this.prepareParameters(parameters);
 		final Properties adjustedProperties = this.prepareProperties(properties);
-		this.delegate = new CsvDataProviderStrategy(adjustedParameters, adjustedProperties);
+		this.delegate = new CsvDataSource(adjustedParameters, adjustedProperties);
 	}
 
 	private void checkProperties(final Properties properties) {
@@ -196,7 +198,8 @@ public class CsvFileAtOnceDataProviderStrategy extends AbstractDataProviderStrat
 			}
 
 			if (!Types.isListOfObjectsType(type)) {
-				errorCollector.addError("The parameter must either be a list of primitives" + " or of a Java Bean type.");
+				errorCollector.addError("The parameter must either be a list of primitives"
+						+ " or of a Java Bean type.");
 			}
 
 			if (errorCollector.hasErrors()) {
@@ -215,7 +218,7 @@ public class CsvFileAtOnceDataProviderStrategy extends AbstractDataProviderStrat
 
 	private Properties prepareProperties(final Properties properties) {
 		if (!properties.containsKey("mapper")) {
-			properties.setProperty("mapper", HeaderNameMappingStrategy.class.getName());
+			properties.setProperty("mapper", HeaderNameMapper.class.getName());
 		}
 		return properties;
 	}

@@ -24,8 +24,8 @@ import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 
-import net.sf.testng.databinding.AbstractDataProviderStrategy;
-import net.sf.testng.databinding.DataProviderStrategyNames;
+import net.sf.testng.databinding.AbstractDataSource;
+import net.sf.testng.databinding.DataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.error.ErrorCollector;
@@ -37,8 +37,8 @@ import net.sf.testng.databinding.util.MethodParameter;
 import net.sf.testng.databinding.util.Types;
 
 
-@DataProviderStrategyNames({ "XML", "xml" })
-public class XMLDataProviderStrategy extends AbstractDataProviderStrategy {
+@DataSource(name = "xml")
+public class XMLDataSource extends AbstractDataSource {
 	private static final String TEST_INPUT_DATA_TAG = "testInputData";
 	private static final String TEST_OUTPUT_DATA_TAG = "testOutputData";
 	private static final String DATA_SET_TAG = "dataSet";
@@ -53,7 +53,7 @@ public class XMLDataProviderStrategy extends AbstractDataProviderStrategy {
 	private boolean usesDataSetTag;
 	private boolean hasNext;
 
-	public XMLDataProviderStrategy(final List<MethodParameter> parameters, final Properties properties) throws Exception {
+	public XMLDataSource(final List<MethodParameter> parameters, final Properties properties) throws Exception {
 		boolean cleanUpNecessary = true;
 		try {
 			checkProperties(properties);

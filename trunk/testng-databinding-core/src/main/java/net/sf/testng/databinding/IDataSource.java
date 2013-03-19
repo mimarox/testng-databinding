@@ -9,6 +9,5 @@ import java.util.Iterator;
  * 
  * @author Matthias Rothe
  */
-public interface DataProviderStrategy extends Iterator<Object[]> {
-
+public interface IDataSource extends Iterator<Object[]> {
 }

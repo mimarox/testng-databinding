@@ -7,9 +7,8 @@ import java.util.List;
  * This exception is thrown if required properties are missing in the data source specification for
  * a test method given in a .data.properties file.
  * <p>
- * The only property always required is <code>strategy</code> which specifies the kind of data
- * source to be used. Each data source handler, called a data provider strategy, may define
- * additional required properties.
+ * The only property always required is <code>dataSource</code> which specifies the kind of data
+ * source to be used. Each data source handler may define additional required properties.
  * 
  * @author Matthias Rothe
  */
