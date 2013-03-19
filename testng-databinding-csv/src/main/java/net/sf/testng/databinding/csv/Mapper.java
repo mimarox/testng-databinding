@@ -12,11 +12,11 @@ import net.sf.testng.databinding.util.Types;
 import au.com.bytecode.opencsv.CSVReader;
 
 
-public abstract class MappingStrategy {
+public abstract class Mapper {
 	private List<MethodParameter> parameters;
 	private Properties properties;
 
-	public MappingStrategy(List<MethodParameter> parameters, Properties properties) {
+	public Mapper(List<MethodParameter> parameters, Properties properties) {
 		List<ErrorCollector> errorCollectors = this.checkParameters(parameters);
 		if (errorCollectors.size() > 0) {
 			throw new MultipleConfigurationErrorsException(errorCollectors);

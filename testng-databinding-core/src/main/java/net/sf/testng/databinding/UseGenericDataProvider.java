@@ -22,7 +22,9 @@ import java.lang.annotation.Target;
  * </pre>
  * 
  * @author Matthias Rothe
+ * @deprecated Use the {@link DataBinding} annotation instead
  */
+@Deprecated
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UseGenericDataProvider {

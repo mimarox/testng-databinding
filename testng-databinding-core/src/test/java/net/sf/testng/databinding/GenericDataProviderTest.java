@@ -4,14 +4,9 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
-import net.sf.testng.databinding.DataProperties;
-import net.sf.testng.databinding.GenericDataProvider;
-import net.sf.testng.databinding.TestInput;
-import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.error.MultipleConfigurationErrorsException;
 
 import org.testng.annotations.Test;
-
 
 public class GenericDataProviderTest {
 	public static class TestBean {
@@ -41,7 +36,7 @@ public class GenericDataProviderTest {
 		this.dataForMethod(name, parameterTypes);
 	}
 
-	@DataProperties(propertiesPrefix = "tSB_LOB")
+	@DataBinding(propertiesPrefix = "tSB_LOB")
 	public void method_SingleBean_ListOfBeans(@TestInput TestBean input, @TestOutput List<TestBean> output) {
 	}
 
@@ -52,7 +47,7 @@ public class GenericDataProviderTest {
 		this.dataForMethod(name, parameterTypes);
 	}
 
-	@DataProperties(propertiesPrefix = "tP_LOB")
+	@DataBinding(propertiesPrefix = "tP_LOB")
 	public void method_Primitive_ListOfBeans(@TestInput(name = "input") String input, @TestOutput List<TestBean> output) {
 	}
 
@@ -63,7 +58,7 @@ public class GenericDataProviderTest {
 		this.dataForMethod(name, parameterTypes);
 	}
 
-	@DataProperties(propertiesPrefix = "tNP")
+	@DataBinding(propertiesPrefix = "tNP")
 	public void method_NoParameters() {
 	}
 }

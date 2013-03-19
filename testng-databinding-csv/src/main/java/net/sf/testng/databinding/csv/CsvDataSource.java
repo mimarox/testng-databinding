@@ -12,17 +12,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
-import net.sf.testng.databinding.AbstractDataProviderStrategy;
-import net.sf.testng.databinding.DataProviderStrategyNames;
+import net.sf.testng.databinding.AbstractDataSource;
+import net.sf.testng.databinding.DataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.error.MissingPropertiesException;
 import net.sf.testng.databinding.util.ConstructorMatcher;
 import net.sf.testng.databinding.util.Constructors;
 import net.sf.testng.databinding.util.MethodParameter;
 import net.sf.testng.databinding.util.MethodParametersAndPropertiesConstructorMatcher;
-
 import au.com.bytecode.opencsv.CSVReader;
-
 
 /**
  * Reads a CSV file line by line and returns the contents of one line per call to {@link #next()}.
@@ -31,13 +29,13 @@ import au.com.bytecode.opencsv.CSVReader;
  * 
  * @author Matthias Rothe
  */
-@DataProviderStrategyNames({ "CSV", "csv" })
-public class CsvDataProviderStrategy extends AbstractDataProviderStrategy {
+@DataSource(name = "csv")
+public class CsvDataSource extends AbstractDataSource {
 	private final CSVReader csvReader;
-	private final MappingStrategy mapper;
+	private final Mapper mapper;
 	private String[] nextLine;
 
-	public CsvDataProviderStrategy(final List<MethodParameter> parameters, final Properties properties) throws Exception {
+	public CsvDataSource(final List<MethodParameter> parameters, final Properties properties) throws Exception {
 		this.checkProperties(properties);
 		this.csvReader = this.createCsvReader(properties);
 		this.mapper = this.createMapper(parameters, properties);
@@ -67,7 +65,8 @@ public class CsvDataProviderStrategy extends AbstractDataProviderStrategy {
 		final char escape = properties.getProperty("escapeChar", "\\").charAt(0);
 		final int line = Integer.parseInt(properties.getProperty("linesToSkip", "0"));
 		final boolean strictQuotes = Boolean.parseBoolean(properties.getProperty("strictQuotes", "false"));
-		final boolean ignoreLeadingWhiteSpace = Boolean.parseBoolean(properties.getProperty("ignoreLeadingWhiteSpace", "false"));
+		final boolean ignoreLeadingWhiteSpace = Boolean.parseBoolean(properties.getProperty("ignoreLeadingWhiteSpace",
+			"false"));
 
 		final BufferedReader rawReader = new BufferedReader(new InputStreamReader(url.openStream(), charset));
 		return new CSVReader(rawReader, separator, quotechar, escape, line, strictQuotes, ignoreLeadingWhiteSpace);
@@ -85,11 +84,22 @@ public class CsvDataProviderStrategy extends AbstractDataProviderStrategy {
 		return url;
 	}
 
-	private MappingStrategy createMapper(final List<MethodParameter> parameters, final Properties properties) throws Exception {
-		final Class<?> mapperClass = Class.forName(properties.getProperty("mapper"));
-		final ConstructorMatcher matcher = new MethodParametersAndPropertiesConstructorMatcher();
-		final Constructor<?> constructor = Constructors.getMatchingConstructor(mapperClass, matcher);
-		return (MappingStrategy) constructor.newInstance(parameters, properties);
+	private Mapper createMapper(final List<MethodParameter> parameters, final Properties properties) throws Exception {
+		String mapperDefinition = properties.getProperty("mapper");
+		Mapper mapper;
+
+		if ("headerNameMapper".equals(mapperDefinition)) {
+			mapper = new HeaderNameMapper(parameters, properties);
+		} else if ("headerNameFileLinkingMapper".equals(mapperDefinition)) {
+			mapper = new HeaderNameFileLinkingMapper(parameters, properties);
+		} else {
+			final Class<?> mapperClass = Class.forName(mapperDefinition);
+			final ConstructorMatcher matcher = new MethodParametersAndPropertiesConstructorMatcher();
+			final Constructor<?> constructor = Constructors.getMatchingConstructor(mapperClass, matcher);
+			mapper = (Mapper) constructor.newInstance(parameters, properties);
+		}
+
+		return mapper;
 	}
 
 	@Override

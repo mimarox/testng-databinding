@@ -31,9 +31,14 @@ public class TestAnnotationTransformer implements IAnnotationTransformer {
 	@SuppressWarnings("rawtypes")
 	public void transform(final ITestAnnotation test, final Class testClass, final Constructor testConstructor,
 			final Method testMethod) {
-		if (testMethod != null && testMethod.getAnnotation(UseGenericDataProvider.class) != null) {
+		if (testMethod != null && usesDataBinding(testMethod)) {
 			test.setDataProviderClass(GenericDataProvider.class);
 			test.setDataProvider("DataProvider");
 		}
+	}
+
+	private boolean usesDataBinding(final Method testMethod) {
+		return testMethod.getAnnotation(DataBinding.class) != null
+				|| testMethod.getDeclaringClass().getAnnotation(DataBinding.class) != null;
 	}
 }

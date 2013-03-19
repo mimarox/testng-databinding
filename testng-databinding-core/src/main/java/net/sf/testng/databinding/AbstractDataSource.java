@@ -1,13 +1,13 @@
 package net.sf.testng.databinding;
 
 /**
- * This class is the base implementation of the {@link DataProviderStrategy} interface. It must be
+ * This class is the base implementation of the {@link IDataSource} interface. It must be
  * implemented by all classes giving access to a certain kind of test data source, like a
  * properties, CSV or XML file.
  * 
  * @author Matthias Rothe
  */
-public abstract class AbstractDataProviderStrategy implements DataProviderStrategy {
+public abstract class AbstractDataSource implements IDataSource {
 
 	/**
 	 * @throws UnsupportedOperationException

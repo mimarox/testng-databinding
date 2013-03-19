@@ -13,7 +13,7 @@ import net.sf.testng.databinding.GenericDataProvider;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.util.MethodParameter;
-import net.sf.testng.databinding.xml.XMLDataProviderStrategy;
+import net.sf.testng.databinding.xml.XMLDataSource;
 import net.sf.testng.databinding.xml.beans.BeanWithMap;
 import net.sf.testng.databinding.xml.beans.IESTestBean;
 import net.sf.testng.databinding.xml.beans.InnerTestBean;
@@ -24,7 +24,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 
-public class XMLDataProviderStrategyTest {
+public class XMLDataSourceTest {
 	private Method methodParametersCreator;
 
 	@BeforeClass
@@ -40,7 +40,7 @@ public class XMLDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/singleRowSingleStringInputValueTestData.xml");
 
-		final XMLDataProviderStrategy provider = new XMLDataProviderStrategy(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { "Hello World!" });
@@ -54,7 +54,7 @@ public class XMLDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/singleRowSingleEnumInputValueTestData.xml");
 
-		final XMLDataProviderStrategy provider = new XMLDataProviderStrategy(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { TestEnum.one });
@@ -68,7 +68,7 @@ public class XMLDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/multiRowSingleStringInputValueTestData.xml");
 
-		final XMLDataProviderStrategy provider = new XMLDataProviderStrategy(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 
@@ -89,7 +89,7 @@ public class XMLDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/multiRowComplexBeanInputValueTestData.xml");
 
-		final XMLDataProviderStrategy provider = new XMLDataProviderStrategy(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 
@@ -109,7 +109,7 @@ public class XMLDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/multipleInputValuesTestData.xml");
 
-		final XMLDataProviderStrategy provider = new XMLDataProviderStrategy(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 
@@ -131,7 +131,7 @@ public class XMLDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/inputOutputValuesTestData.xml");
 
-		final XMLDataProviderStrategy provider = new XMLDataProviderStrategy(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 
@@ -149,7 +149,7 @@ public class XMLDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/beanWithMapTestData.xml");
 
-		final XMLDataProviderStrategy provider = new XMLDataProviderStrategy(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { new BeanWithMap() });
@@ -167,7 +167,7 @@ public class XMLDataProviderStrategyTest {
 		final Properties properties = new Properties();
 		properties.setProperty("url", "/listWithIESTestData.xml");
 
-		final XMLDataProviderStrategy provider = new XMLDataProviderStrategy(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { entries, bean });

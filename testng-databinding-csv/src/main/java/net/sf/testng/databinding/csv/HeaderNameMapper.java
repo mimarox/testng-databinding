@@ -22,14 +22,14 @@ import net.sf.testng.databinding.util.Types;
 import au.com.bytecode.opencsv.CSVReader;
 
 
-public class HeaderNameMappingStrategy extends MappingStrategy {
+public class HeaderNameMapper extends Mapper {
 	private String inputColumnPrefix;
 	private String outputColumnPrefix;
 	private List<String> headers = new ArrayList<String>();
 	private List<MethodParameter> inputParameters = new ArrayList<MethodParameter>();
 	private List<MethodParameter> outputParameters = new ArrayList<MethodParameter>();
 
-	public HeaderNameMappingStrategy(List<MethodParameter> parameters, Properties properties) {
+	public HeaderNameMapper(List<MethodParameter> parameters, Properties properties) {
 		super(parameters, properties);
 
 		this.inputColumnPrefix = properties.getProperty("inputColumnPrefix", "in_");
