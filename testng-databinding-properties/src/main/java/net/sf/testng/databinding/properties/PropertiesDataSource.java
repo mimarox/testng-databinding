@@ -27,7 +27,6 @@ import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
 import net.sf.testng.databinding.util.Types;
 
-
 @DataSource(name = "properties")
 public class PropertiesDataSource extends AbstractDataSource {
 	private final Properties data;
@@ -78,7 +77,7 @@ public class PropertiesDataSource extends AbstractDataSource {
 			final ErrorCollector errorCollector = new ErrorCollector(type);
 
 			if (Types.isListOfObjectsType(type)) {
-				errorCollector.addError("Type " + type + " is not supported by this data provider strategy: " + this.getClass());
+				errorCollector.addError("Type " + type + " is not supported by this data source: " + this.getClass());
 			}
 
 			if (errorCollector.hasErrors()) {
@@ -260,8 +259,8 @@ public class PropertiesDataSource extends AbstractDataSource {
 
 			for (final PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
 				if (this.isWriteable(descriptor)) {
-					descriptor.getWriteMethod()
-							.invoke(object, createObject(createMethodParameterForProperty(descriptor), prefix));
+					descriptor.getWriteMethod().invoke(object,
+						createObject(createMethodParameterForProperty(descriptor), prefix));
 				}
 			}
 
