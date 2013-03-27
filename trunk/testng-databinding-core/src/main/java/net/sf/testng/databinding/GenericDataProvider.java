@@ -186,9 +186,12 @@ public class GenericDataProvider {
 		for (final MethodParameter parameter : parameters) {
 			final Type type = parameter.getType();
 			final ErrorCollector errorCollector = new ErrorCollector(type);
+			boolean foundAnnotation = false;
 
 			for (final Annotation annotation : parameter.getAnnotations()) {
 				if (annotation instanceof TestInput) {
+					foundAnnotation = true;
+
 					if (!Types.isSupportedType(type)) {
 						errorCollector.addError("Unsupported type.");
 					} else if (Types.requiresName(type) && Annotations.nameNotSet(annotation)) {
@@ -196,16 +199,20 @@ public class GenericDataProvider {
 								+ "of the @TestInput annotation of this parameter.");
 					}
 				} else if (annotation instanceof TestOutput) {
+					foundAnnotation = true;
+
 					if (!Types.isSupportedType(type)) {
 						errorCollector.addError("Unsupported type.");
 					} else if (Types.requiresName(type) && Annotations.nameNotSet(annotation)) {
 						errorCollector.addError("No name set. You need to set the name attribute "
 								+ "of the @TestOutput annotation of this parameter.");
 					}
-				} else {
-					errorCollector.addError("No data type annotation given. This parameter must "
-							+ "either be annotated with @TestInput or @TestOutput.");
 				}
+			}
+
+			if (!foundAnnotation) {
+				errorCollector.addError("No data type annotation given. This parameter must "
+						+ "either be annotated with @TestInput or @TestOutput.");
 			}
 
 			if (errorCollector.hasErrors()) {
