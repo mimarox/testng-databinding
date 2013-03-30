@@ -44,7 +44,7 @@ import net.sf.testng.databinding.util.Types;
  * <td>dataSource</td>
  * <td><code>csv-file-at-once</code></td>
  * <td>N/A</td>
- * <td>The name of this data provider strategy</td>
+ * <td>The name of this data source</td>
  * <td>Yes</td>
  * </tr>
  * <tr>
