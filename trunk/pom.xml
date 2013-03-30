@@ -57,6 +57,7 @@
 				<module>testng-databinding-core</module>
 				<module>testng-databinding-csv</module>
 				<module>testng-databinding-properties</module>
+				<module>testng-databinding-text</module>
 				<module>testng-databinding-xml</module>
 			</modules>
 		</profile>
