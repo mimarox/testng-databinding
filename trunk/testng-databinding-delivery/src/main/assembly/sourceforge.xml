@@ -27,6 +27,7 @@
 	            <include>net.sf.testngdatabind:testng-databinding-core:jar:${delivery-version}</include>
 	            <include>net.sf.testngdatabind:testng-databinding-csv:jar:${delivery-version}</include>
 	            <include>net.sf.testngdatabind:testng-databinding-properties:jar:${delivery-version}</include>
+	            <include>net.sf.testngdatabind:testng-databinding-text:jar:${delivery-version}</include>
 	            <include>net.sf.testngdatabind:testng-databinding-xml:jar:${delivery-version}</include>
 	        </includes>
 	    </dependencySet>
@@ -49,6 +50,7 @@
 	            <include>net.sf.testngdatabind:testng-databinding-core:jar:sources:${delivery-version}</include>
 	            <include>net.sf.testngdatabind:testng-databinding-csv:jar:sources:${delivery-version}</include>
 	            <include>net.sf.testngdatabind:testng-databinding-properties:jar:sources:${delivery-version}</include>
+	            <include>net.sf.testngdatabind:testng-databinding-text:jar:sources:${delivery-version}</include>
 	            <include>net.sf.testngdatabind:testng-databinding-xml:jar:sources:${delivery-version}</include>
 			</includes>
 			<outputFileNameMapping>${artifact.artifactId}-V${artifact.baseVersion}${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
