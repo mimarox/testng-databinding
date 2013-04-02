@@ -7,8 +7,15 @@ import java.util.NoSuchElementException;
  * This interface serves as the base interface for all data sources. It defines no methods, but binds the type
  * parameter of the {@link Iterator} interface to {@link Object Object[]}. It must be implemented by all classes giving
  * access to a certain kind of test data source, like a properties, CSV or XML file.
+ * <p>
+ * For information on how to use a particular data source, please see the classes implementing this interface. For
+ * general information see the {@link GenericDataProvider} class.
  * 
  * @author Matthias Rothe
+ * @see GenericDataProvider
+ * @see DataBinding
+ * @see TestInput
+ * @see TestOutput
  */
 public interface IDataSource extends Iterator<Object[]> {
 

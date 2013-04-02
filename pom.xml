@@ -34,6 +34,9 @@
 			<url>http://www.matthiasrothe.com</url>
 		</developer>
 	</developers>
+	<properties>
+		<javadoc.title>TestNG Data Binding 2.0 API</javadoc.title>
+	</properties>
 	<build>
 		<plugins>
 			<plugin>
@@ -42,6 +45,25 @@
 				<configuration>
 					<source>1.6</source>
 					<target>1.6</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<doctitle>${javadoc.title}</doctitle>
+					<windowtitle>${javadoc.title}</windowtitle>
+					<groups>
+						<group>
+							<title>Core Packages</title>
+							<packages>net.sf.testng.databinding:net.sf.testng.databinding.core*:net.sf.testng.databinding.util</packages>
+						</group>
+						<group>
+							<title>Data Source Packages</title>
+							<packages>net.sf.testng.databinding.csv*:net.sf.testng.databinding.properties*:net.sf.testng.databinding.text*:net.sf.testng.databinding.xml*</packages>
+						</group>
+					</groups>
+					<overview>src/javadoc/overview-summary.html</overview>
 				</configuration>
 			</plugin>
 		</plugins>
