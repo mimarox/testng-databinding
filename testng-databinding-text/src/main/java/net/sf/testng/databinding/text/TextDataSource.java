@@ -12,9 +12,9 @@ import java.util.Properties;
 
 import net.sf.testng.databinding.AbstractDataSource;
 import net.sf.testng.databinding.DataSource;
-import net.sf.testng.databinding.error.ErrorCollector;
-import net.sf.testng.databinding.error.MissingPropertiesException;
-import net.sf.testng.databinding.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.core.error.ErrorCollector;
+import net.sf.testng.databinding.core.error.MissingPropertiesException;
+import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
 import net.sf.testng.databinding.util.MethodParameter;
 
 @DataSource(name = "text")

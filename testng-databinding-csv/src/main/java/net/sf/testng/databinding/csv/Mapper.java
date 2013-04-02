@@ -4,10 +4,10 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Properties;
 
-import net.sf.testng.databinding.error.ErrorCollector;
-import net.sf.testng.databinding.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.core.error.ErrorCollector;
+import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.MethodParameter;
-import net.sf.testng.databinding.util.Types;
 
 import au.com.bytecode.opencsv.CSVReader;
 

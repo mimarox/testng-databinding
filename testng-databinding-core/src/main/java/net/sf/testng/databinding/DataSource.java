@@ -24,7 +24,8 @@ public @interface DataSource {
 
 	/**
 	 * Defines the name of the data source a class implementing the {@link IDataSource}
-	 * interface supports.
+	 * interface supports. This name is used to define the data source to be used in the
+	 * .data.properties file.
 	 * 
 	 * @return The data source name
 	 */

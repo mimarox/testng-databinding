@@ -1,7 +1,7 @@
-package net.sf.testng.databinding.util;
+package net.sf.testng.databinding.core.util;
 
-import net.sf.testng.databinding.beans.Preprocessors;
-import net.sf.testng.databinding.beans.ValueProcessor;
+import net.sf.testng.databinding.core.beans.Preprocessors;
+import net.sf.testng.databinding.core.beans.ValueProcessor;
 
 /**
  * This class contains some static methods for applying {@link Preprocessors} and

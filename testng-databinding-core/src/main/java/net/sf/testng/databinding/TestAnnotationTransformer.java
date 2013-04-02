@@ -8,7 +8,7 @@ import org.testng.annotations.ITestAnnotation;
 
 /**
  * {@link IAnnotationTransformer} implementation enabling the behavior of the
- * {@link UseGenericDataProvider} annotation.
+ * {@link DataBinding &#64;DataBinding} annotation.
  * <p>
  * You need to add this class as a listener to your testng.xml file like so:
  * 

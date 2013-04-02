@@ -4,7 +4,7 @@ import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 
-import net.sf.testng.databinding.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
 
 import org.testng.annotations.Test;
 
