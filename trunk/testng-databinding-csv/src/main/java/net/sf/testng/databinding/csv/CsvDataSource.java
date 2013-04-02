@@ -48,9 +48,6 @@ public class CsvDataSource extends AbstractDataSource {
 		if (!properties.containsKey("url")) {
 			missingKeys.add("url");
 		}
-		if (!properties.containsKey("mapper")) {
-			missingKeys.add("mapper");
-		}
 
 		if (missingKeys.size() > 0) {
 			throw new MissingPropertiesException(missingKeys);
@@ -85,7 +82,7 @@ public class CsvDataSource extends AbstractDataSource {
 	}
 
 	private Mapper createMapper(final List<MethodParameter> parameters, final Properties properties) throws Exception {
-		String mapperDefinition = properties.getProperty("mapper");
+		String mapperDefinition = properties.getProperty("mapper", "headerNameMapper");
 		Mapper mapper;
 
 		if ("headerNameMapper".equals(mapperDefinition)) {
