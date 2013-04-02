@@ -19,13 +19,13 @@ import net.sf.testng.databinding.AbstractDataSource;
 import net.sf.testng.databinding.DataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
-import net.sf.testng.databinding.error.ErrorCollector;
-import net.sf.testng.databinding.error.MissingPropertiesException;
-import net.sf.testng.databinding.error.MultipleConfigurationErrorsException;
-import net.sf.testng.databinding.error.MultipleSourceErrorsException;
+import net.sf.testng.databinding.core.error.ErrorCollector;
+import net.sf.testng.databinding.core.error.MissingPropertiesException;
+import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.core.error.MultipleSourceErrorsException;
+import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
-import net.sf.testng.databinding.util.Types;
 
 @DataSource(name = "properties")
 public class PropertiesDataSource extends AbstractDataSource {

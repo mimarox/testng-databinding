@@ -15,11 +15,11 @@ import java.util.Properties;
 import net.sf.testng.databinding.AbstractDataSource;
 import net.sf.testng.databinding.DataSource;
 import net.sf.testng.databinding.TestInput;
-import net.sf.testng.databinding.error.MissingPropertiesException;
+import net.sf.testng.databinding.core.error.MissingPropertiesException;
+import net.sf.testng.databinding.core.util.MethodParametersAndPropertiesConstructorMatcher;
 import net.sf.testng.databinding.util.ConstructorMatcher;
 import net.sf.testng.databinding.util.Constructors;
 import net.sf.testng.databinding.util.MethodParameter;
-import net.sf.testng.databinding.util.MethodParametersAndPropertiesConstructorMatcher;
 import au.com.bytecode.opencsv.CSVReader;
 
 /**

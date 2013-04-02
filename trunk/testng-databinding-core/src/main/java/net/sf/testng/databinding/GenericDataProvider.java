@@ -16,19 +16,19 @@ import java.util.Set;
 
 import net.sf.extcos.ComponentQuery;
 import net.sf.extcos.ComponentScanner;
-import net.sf.testng.databinding.error.ErrorCollector;
-import net.sf.testng.databinding.error.MissingPropertiesException;
-import net.sf.testng.databinding.error.MultipleConfigurationErrorsException;
-import net.sf.testng.databinding.error.UnsupportedDataProviderStrategyException;
-import net.sf.testng.databinding.properties.DoNothingPropertiesPrefixPreprocessor;
-import net.sf.testng.databinding.properties.PropertiesPrefixPreprocessor;
-import net.sf.testng.databinding.util.Annotations;
+import net.sf.testng.databinding.core.error.ErrorCollector;
+import net.sf.testng.databinding.core.error.MissingPropertiesException;
+import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.core.error.UnsupportedDataSourceException;
+import net.sf.testng.databinding.core.properties.DoNothingPropertiesPrefixPreprocessor;
+import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
+import net.sf.testng.databinding.core.util.Annotations;
+import net.sf.testng.databinding.core.util.MethodParametersAndPropertiesConstructorMatcher;
+import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.ConstructorMatcher;
 import net.sf.testng.databinding.util.Constructors;
 import net.sf.testng.databinding.util.MethodParameter;
-import net.sf.testng.databinding.util.MethodParametersAndPropertiesConstructorMatcher;
 import net.sf.testng.databinding.util.PropertiesUtil;
-import net.sf.testng.databinding.util.Types;
 
 import org.testng.annotations.DataProvider;
 
@@ -249,7 +249,7 @@ public class GenericDataProvider {
 		final String dataSource = dataProperties.getProperty(DATA_SOURCE_KEY).toLowerCase();
 
 		if (!getDataSources().containsKey(dataSource)) {
-			throw new UnsupportedDataProviderStrategyException(dataProperties.getProperty(DATA_SOURCE_KEY));
+			throw new UnsupportedDataSourceException(dataProperties.getProperty(DATA_SOURCE_KEY));
 		}
 	}
 

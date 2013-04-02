@@ -1,4 +1,4 @@
-package net.sf.testng.databinding.beans;
+package net.sf.testng.databinding.core.beans;
 
 /**
  * Interface for classes providing value processing / transformation.

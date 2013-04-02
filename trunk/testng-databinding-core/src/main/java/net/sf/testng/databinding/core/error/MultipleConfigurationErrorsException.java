@@ -1,4 +1,4 @@
-package net.sf.testng.databinding.error;
+package net.sf.testng.databinding.core.error;
 
 import java.util.List;
 

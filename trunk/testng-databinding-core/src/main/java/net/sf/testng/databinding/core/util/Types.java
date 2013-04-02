@@ -1,4 +1,4 @@
-package net.sf.testng.databinding.util;
+package net.sf.testng.databinding.core.util;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.ParameterizedType;

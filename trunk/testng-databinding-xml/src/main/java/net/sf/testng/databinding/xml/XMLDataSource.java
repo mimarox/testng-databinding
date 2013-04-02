@@ -30,13 +30,13 @@ import net.sf.testng.databinding.DataSource;
 import net.sf.testng.databinding.IDataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
-import net.sf.testng.databinding.error.ErrorCollector;
-import net.sf.testng.databinding.error.MissingPropertiesException;
-import net.sf.testng.databinding.error.MultipleConfigurationErrorsException;
-import net.sf.testng.databinding.error.MultipleSourceErrorsException;
+import net.sf.testng.databinding.core.error.ErrorCollector;
+import net.sf.testng.databinding.core.error.MissingPropertiesException;
+import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.core.error.MultipleSourceErrorsException;
+import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
-import net.sf.testng.databinding.util.Types;
 
 /**
  * <p>
@@ -125,8 +125,9 @@ import net.sf.testng.databinding.util.Types;
  * <ul>
  * <li>Generally the same rules that apply to non-list type parameters also apply to list type parameters, taking the name
  * either from the <code>&#64;TestInput</code>/<code>&#64;TestOutput</code> annotation <code>name</code> property or the
- * simple name of the type. However plurals are expected: either a single <code>'s'</code> for general names or an
- * <code>'ies'</code> suffix for names ending in <code>'y'</code></li>
+ * simple name of the type. However plurals in such names are handled: names can either have a single <code>'s'</code> for
+ * general names or an <code>'ies'</code> suffix for singulars ending in <code>'y'</code>. The tag name will always be
+ * the singular.</li>
  * </ul>
  * </li>
  * <li>There must be tags following the same rules just given for test method parameters for all the properties in a Java
@@ -144,12 +145,229 @@ import net.sf.testng.databinding.util.Types;
  * unchanged. Any tags for which no Java Bean properties of matching name and supported type can be found are skipped
  * ignoring them.
  * </p>
- * <h3>Examples</h3>
+ * <h3>Example</h3>
  * <p>
- * As examples make issues clearer, here are some for popular use cases. Each example provides a short description,
- * a test method declaration, data property declarations, an XML data source file and if applicable definitions of
- * Java Beans the data should be bound to.
+ * To make issues clearer, here is an example of this data source in use. It's test method does a kind of
+ * functional test on the advanced Google Search facility using a limited set of input data and checking the search results
+ * returned. The actual test code is pseudocode that does not work, and is not part of the TestNG Data Binding framework,
+ * but clearly conveys the intent. Getters and setters are omitted in Java Beans for brevity in this example. They are
+ * however crucial in actual Java Beans, so you have to include them in any Java Bean you actually want to bind data to.
  * </p>
+ * <h4>Test Method</h4>
+ * <pre>
+ * &#64;DataBinding(propertiesPrefix = "advancedSearch")
+ * public void testAdvancedGoogleSearch(&#64;TestInput(name = "searchTerm") final String searchTerm,
+ *         &#64;TestInput final FileType fileType, &#64;TestOutput final List&lt;SearchResult&gt; searchResults) {
+ *     // Run the search
+ *     open("http://www.google.com/advanced_search"); // hard coded as it doesn't change
+ *     insert(searchTerm).into("allTermsInputField");
+ *     select(fileType.getLabel()).from("fileTypeSelection");
+ *     click("advancedSearchButton").andWaitForPageToLoad();
+ *     
+ *     // Check search results
+ *     for (SearchResult searchResult : searchResults) {
+ *         SearchResultDefinition definition = searchResult.getSearchResultDefinition();
+ *         ResultingPage page = searchResult.getResultingPage();
+ *         
+ *         assertPageContainsLinkLabeled(definition.getLinkLabel());
+ *         assertPageContainsResultDescription(definition.getDescription());
+ *         
+ *         String pageUrl = getLinkUrlForLabel(definition.getLinkLabel());
+ *         page.setPageUrl(pageUrl);
+ *     }
+ *     
+ *     // Check resulting pages
+ *     for (SearchResult searchResult : searchResults) {
+ *         ResultingPage page = searchResult.getResultingPage();
+ *         
+ *         open(page.getPageUrl());
+ *         assertTitle(page.getTitle());
+ *         assertContainsText(page.getText());
+ *     }
+ * }
+ * </pre>
+ * <h4>Java Classes</h4>
+ * <h5>Enum: FileType</h5>
+ * <pre>
+ * public enum FileType {
+ *     ALL("any format"),
+ *     PDF("Adobe Acrobat PDF (.pdf)"),
+ *     PS("Adobe Postscript (.ps)"),
+ *     /* Remaining types omitted for brevity &#42;/;
+ *     
+ *     private String label;
+ *     
+ *     private FileType(final String label) {
+ *         this.label = label;
+ *     }
+ *     
+ *     public String getLabel() {
+ *         return label;
+ *     }
+ * }
+ * </pre>
+ * <h5>Java Bean: SearchResult</h5>
+ * <pre>
+ * public class SearchResult {
+ *     private SearchResultDefinition searchResultDefinition;
+ *     private ResultingPage resultingPage;
+ *     
+ *     /* Getters and setters omitted for brevity &#42;/
+ * }
+ * </pre>
+ * <h5>Java Bean: SearchResultDefinition</h5>
+ * <pre>
+ * public class SearchResultDefinition {
+ *     private String linkLabel;
+ *     private String description;
+ *     
+ *     /* Getters and setters omitted for brevity &#42;/
+ * }
+ * </pre>
+ * <h5>Java Bean: ResultingPage</h5>
+ * <pre>
+ * public class ResultingPage {
+ *     private String pageUrl;
+ *     private String title;
+ *     private String text;
+ *     
+ *     /* Getters and setters omitted for brevity &#42;/
+ * }
+ * </pre>
+ * <h4>Data Properties File</h4>
+ * <pre>
+ * advancedSearch.dataSource=xml
+ * advancedSearch.url=/data/advancedSearch.xml
+ * </pre>
+ * <h4>XML Data Sources</h4>
+ * <h5>Data source containing data for one invocation of the test method</h5>
+ * <p>
+ * The following two XML files are equivalent. For just one invocation of the test method, the
+ * <code>&lt;dataSet&gt;</code> tag can be given or omitted.
+ * </p>
+ * <p>With <code>&lt;dataSet&gt;</code> tag:</p>
+ * <pre>
+ * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+ * &lt;testData&gt;
+ *     &lt;dataSet&gt;
+ *         &lt;testInputData&gt;
+ *             &lt;searchTerm&gt;Java Component Scanner&lt;/searchTerm&gt;
+ *             &lt;fileType&gt;ALL&lt;/fileType&gt;
+ *         &lt;/testInputData&gt;
+ *         &lt;testOutputData&gt;
+ *             &lt;searchResult&gt;
+ *                 &lt;searchResultDefinition&gt;
+ *                     &lt;linkLabel&gt;Download Extensible Component Scanner 0.4b Free - A Java ...&lt;/linkLabel&gt;
+ *                     &lt;description&gt;Nov 19, 2012 – Download Extensible Component Scanner - A Java component to help you with your work.&lt;/description&gt;
+ *                 &lt;/searchResultDefinition&gt;
+ *                 &lt;resultingPage&gt;
+ *                     &lt;title&gt;Download Extensible Component Scanner 0.4b Free - A Java component to help you with your work. - Softpedia&lt;/title&gt;
+ *                     &lt;text&gt;Extensible Component Scanner 0.4b&lt;/text&gt;
+ *                 &lt;/resultingPage&gt;
+ *             &lt;/searchResult&gt;
+ *             &lt;searchResult&gt;
+ *                 &lt;searchResultDefinition&gt;
+ *                     &lt;linkLabel&gt;Extensible Component Scanner | Free Development software ...&lt;/linkLabel&gt;
+ *                     &lt;description&gt;Nov 24, 2012 – You'll love this: component scanning as easy as select(javaClasses()).from("your.package").returning(allAnnotatedWith(YourAnnotation.class)).&lt;/description&gt;
+ *                 &lt;/searchResultDefinition&gt;
+ *                 &lt;resultingPage&gt;
+ *                     &lt;title&gt;Extensible Component Scanner | Free Development software downloads at SourceForge.net&lt;/title&gt;
+ *                     &lt;text&gt;eXtcos is now also available from Maven Central. To include it into your Maven project just add this dependency:&lt;/text&gt;
+ *                 &lt;/resultingPage&gt;
+ *             &lt;/searchResult&gt;
+ *         &lt;/testOutputData&gt;
+ *     &lt;/dataSet&gt;
+ * &lt;/testData&gt;
+ * </pre>
+ * <p>Without <code>&lt;dataSet&gt;</code> tag:</p>
+ * <pre>
+ * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+ * &lt;testData&gt;
+ *     &lt;testInputData&gt;
+ *         &lt;searchTerm&gt;Java Component Scanner&lt;/searchTerm&gt;
+ *         &lt;fileType&gt;ALL&lt;/fileType&gt;
+ *     &lt;/testInputData&gt;
+ *     &lt;testOutputData&gt;
+ *         &lt;searchResult&gt;
+ *             &lt;searchResultDefinition&gt;
+ *                 &lt;linkLabel&gt;Download Extensible Component Scanner 0.4b Free - A Java ...&lt;/linkLabel&gt;
+ *                 &lt;description&gt;Nov 19, 2012 – Download Extensible Component Scanner - A Java component to help you with your work.&lt;/description&gt;
+ *             &lt;/searchResultDefinition&gt;
+ *             &lt;resultingPage&gt;
+ *                 &lt;title&gt;Download Extensible Component Scanner 0.4b Free - A Java component to help you with your work. - Softpedia&lt;/title&gt;
+ *                 &lt;text&gt;Extensible Component Scanner 0.4b&lt;/text&gt;
+ *             &lt;/resultingPage&gt;
+ *         &lt;/searchResult&gt;
+ *         &lt;searchResult&gt;
+ *             &lt;searchResultDefinition&gt;
+ *                 &lt;linkLabel&gt;Extensible Component Scanner | Free Development software ...&lt;/linkLabel&gt;
+ *                 &lt;description&gt;Nov 24, 2012 – You'll love this: component scanning as easy as select(javaClasses()).from("your.package").returning(allAnnotatedWith(YourAnnotation.class)).&lt;/description&gt;
+ *             &lt;/searchResultDefinition&gt;
+ *             &lt;resultingPage&gt;
+ *                 &lt;title&gt;Extensible Component Scanner | Free Development software downloads at SourceForge.net&lt;/title&gt;
+ *                 &lt;text&gt;eXtcos is now also available from Maven Central. To include it into your Maven project just add this dependency:&lt;/text&gt;
+ *             &lt;/resultingPage&gt;
+ *         &lt;/searchResult&gt;
+ *     &lt;/testOutputData&gt;
+ * &lt;/testData&gt;
+ * </pre>
+ * <h5>Data source containing data for several invocations of the test method</h5>
+ * <p>
+ * For several invocations of the test method, the <code>&lt;dataSet&gt;</code> tag must be given. The number of
+ * <code>&lt;dataSet&gt;</code> tags equals the number of test method invocations. For brevity's sake this example will
+ * just include two data sets resulting in two test method invocations.
+ * </p>
+ * <pre>
+ * &lt;?xml version="1.0" encoding="UTF-8"?&gt;
+ * &lt;testData&gt;
+ *     &lt;dataSet&gt;
+ *         &lt;testInputData&gt;
+ *             &lt;searchTerm&gt;Java Component Scanner&lt;/searchTerm&gt;
+ *             &lt;fileType&gt;ALL&lt;/fileType&gt;
+ *         &lt;/testInputData&gt;
+ *         &lt;testOutputData&gt;
+ *             &lt;searchResult&gt;
+ *                 &lt;searchResultDefinition&gt;
+ *                     &lt;linkLabel&gt;Download Extensible Component Scanner 0.4b Free - A Java ...&lt;/linkLabel&gt;
+ *                     &lt;description&gt;Nov 19, 2012 – Download Extensible Component Scanner - A Java component to help you with your work.&lt;/description&gt;
+ *                 &lt;/searchResultDefinition&gt;
+ *                 &lt;resultingPage&gt;
+ *                     &lt;title&gt;Download Extensible Component Scanner 0.4b Free - A Java component to help you with your work. - Softpedia&lt;/title&gt;
+ *                     &lt;text&gt;Extensible Component Scanner 0.4b&lt;/text&gt;
+ *                 &lt;/resultingPage&gt;
+ *             &lt;/searchResult&gt;
+ *             &lt;searchResult&gt;
+ *                 &lt;searchResultDefinition&gt;
+ *                     &lt;linkLabel&gt;Extensible Component Scanner | Free Development software ...&lt;/linkLabel&gt;
+ *                     &lt;description&gt;Nov 24, 2012 – You'll love this: component scanning as easy as select(javaClasses()).from("your.package").returning(allAnnotatedWith(YourAnnotation.class)).&lt;/description&gt;
+ *                 &lt;/searchResultDefinition&gt;
+ *                 &lt;resultingPage&gt;
+ *                     &lt;title&gt;Extensible Component Scanner | Free Development software downloads at SourceForge.net&lt;/title&gt;
+ *                     &lt;text&gt;eXtcos is now also available from Maven Central. To include it into your Maven project just add this dependency:&lt;/text&gt;
+ *                 &lt;/resultingPage&gt;
+ *             &lt;/searchResult&gt;
+ *         &lt;/testOutputData&gt;
+ *     &lt;/dataSet&gt;
+ *     &lt;dataSet&gt;
+ *         &lt;testInputData&gt;
+ *             &lt;searchTerm&gt;json transformation engine&lt;/searchTerm&gt;
+ *             &lt;fileType&gt;ALL&lt;/fileType&gt;
+ *         &lt;/testInputData&gt;
+ *         &lt;testOutputData&gt;
+ *             &lt;searchResult&gt;
+ *                 &lt;searchResultDefinition&gt;
+ *                     &lt;linkLabel&gt;Jetro | Free software downloads at SourceForge.net&lt;/linkLabel&gt;
+ *                     &lt;description&gt;Jetro provides a JSON transformation engine and a comprehensive JSON tree API. It allows transforming any JSON source representation into&lt;/description&gt;
+ *                 &lt;/searchResultDefinition&gt;
+ *                 &lt;resultingPage&gt;
+ *                     &lt;title&gt;Jetro | Free  software downloads at SourceForge.net&lt;/title&gt;
+ *                     &lt;text&gt;JSON transformations - powerful, yet quick and easy&lt;/text&gt;
+ *                 &lt;/resultingPage&gt;
+ *             &lt;/searchResult&gt;
+ *         &lt;/testOutputData&gt;
+ *     &lt;/dataSet&gt;
+ * &lt;/testData&gt;
+ * </pre>
  * 
  * @author Matthias Rothe
  */
@@ -169,6 +387,14 @@ public class XMLDataSource extends AbstractDataSource {
 	private boolean usesDataSetTag;
 	private boolean hasNext;
 
+	/**
+	 * Constructs a new instance of this class, setting the {@link MethodParameter test method parameters} to load the
+	 * data for and the {@link Properties properties} describing where to load the data from.
+	 * 
+	 * @param parameters The test method parameters for which data is to be loaded
+	 * @param properties The properties describing where to load the data from
+	 * @throws Exception If anything goes wrong during the creation of this instance
+	 */
 	public XMLDataSource(final List<MethodParameter> parameters, final Properties properties) throws Exception {
 		boolean cleanUpNecessary = true;
 		try {
@@ -273,11 +499,17 @@ public class XMLDataSource extends AbstractDataSource {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean hasNext() {
 		return hasNext;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Object[] next() {
 		if (hasNext) {

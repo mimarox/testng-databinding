@@ -6,8 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 
-import net.sf.testng.databinding.properties.DoNothingPropertiesPrefixPreprocessor;
-import net.sf.testng.databinding.properties.PropertiesPrefixPreprocessor;
+import net.sf.testng.databinding.core.properties.DoNothingPropertiesPrefixPreprocessor;
+import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
 
 /**
  * Annotation for {@link Test @Test} annotated methods, causing the

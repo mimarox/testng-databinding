@@ -1,4 +1,4 @@
-package net.sf.testng.databinding.beans;
+package net.sf.testng.databinding.core.beans;
 
 /**
  * A {@link String#toLowerCase()} implementation of a {@link ValueProcessor}.
