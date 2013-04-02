@@ -1,0 +1,24 @@
+<html>
+	<head>
+		<title>TestNG Data Binding 2.0 API Overview</title>
+	</head>
+	<body>
+		The TestNG Data Binding framework provides binding of data from various sources to parameters of
+		<a href="http://testng.org" target="_blank">TestNG</a> test methods.
+		<h3>Usage Example</h3>
+		<p>
+		As this framework is annotation driven on the user interface side, a small example showing the
+		main components should help getting you started. Consider the following test method and follow
+		the linked annotations. For a general introduction see the
+		{@link net.sf.testng.databinding.GenericDataProvider} class. For detailed information on any single
+		data source, follow the package links given in the data source packages table above.
+		</p>
+		<pre>
+	<a href="http://testng.org/javadocs/org/testng/annotations/Test.html" target="_blank">&#64;Test</a>
+	{@link net.sf.testng.databinding.DataBinding &#64;DataBinding}
+	public void testAdd({@link net.sf.testng.databinding.TestInput &#64;TestInput}({@link net.sf.testng.databinding.TestInput#name name} = "a") final int a, {@link net.sf.testng.databinding.TestInput &#64;TestInput}({@link net.sf.testng.databinding.TestInput#name name} = "b") final int b, {@link net.sf.testng.databinding.TestOutput &#64;TestOutput}({@link net.sf.testng.databinding.TestOutput#name name} = "c") final int c) {
+	    assertEquals(a + b, c);
+	}
+		</pre>
+	</body>
+</html>

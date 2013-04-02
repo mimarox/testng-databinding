@@ -10,8 +10,8 @@ import net.sf.testng.databinding.core.properties.DoNothingPropertiesPrefixPrepro
 import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
 
 /**
- * Annotation for {@link Test @Test} annotated methods, causing the
- * {@link GenericDataProvider} to be used for data provision.
+ * Annotation for TestNG <a href="http://testng.org/javadocs/org/testng/annotations/Test.html" target="_blank">&#64;Test</a>
+ * annotated methods, causing the {@link GenericDataProvider} to be used for data provision.
  * <p>
  * Requires that the {@link TestAnnotationTransformer} be specified as a listener in the testng.xml
  * file like so:
@@ -32,6 +32,9 @@ import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
  * test method needs to also be annotated with this annotation specifying the parameters as needed.
  * 
  * @author Matthias Rothe
+ * @see GenericDataProvider
+ * @see TestInput
+ * @see TestOutput
  */
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)

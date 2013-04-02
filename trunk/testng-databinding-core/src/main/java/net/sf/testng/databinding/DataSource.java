@@ -16,7 +16,6 @@ import java.lang.annotation.Target;
  * 
  * @author Matthias Rothe
  */
-
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
