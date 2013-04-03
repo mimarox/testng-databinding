@@ -25,6 +25,7 @@ import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
 import net.sf.testng.databinding.core.util.Annotations;
 import net.sf.testng.databinding.core.util.MethodParametersAndPropertiesConstructorMatcher;
 import net.sf.testng.databinding.core.util.Types;
+import net.sf.testng.databinding.util.BasePackageLoader;
 import net.sf.testng.databinding.util.ConstructorMatcher;
 import net.sf.testng.databinding.util.Constructors;
 import net.sf.testng.databinding.util.MethodParameter;
@@ -108,8 +109,11 @@ public class GenericDataProvider {
 			scanner.getClasses(new ComponentQuery() {
 				@Override
 				protected void query() {
-					select().from("net.sf.testng.databinding")
-						.andStore(thoseImplementing(IDataSource.class).into(classes)).returning(none());
+					select()
+						.from(
+							BasePackageLoader.loadBasePackages("testng-databinding.base-packages").toArray(
+								new String[] {})).andStore(thoseImplementing(IDataSource.class).into(classes))
+						.returning(none());
 				}
 			});
 
@@ -255,10 +259,10 @@ public class GenericDataProvider {
 
 	private static IDataSource getDataSource(final List<MethodParameter> parameters, final Properties dataProperties)
 			throws Exception {
-		final Class<? extends IDataSource> strategyClass = getDataSources().get(
+		final Class<? extends IDataSource> dataSourceClass = getDataSources().get(
 			dataProperties.getProperty(DATA_SOURCE_KEY).toLowerCase());
 		final ConstructorMatcher matcher = new MethodParametersAndPropertiesConstructorMatcher();
-		final Constructor<IDataSource> constructor = Constructors.getMatchingConstructor(strategyClass, matcher);
+		final Constructor<IDataSource> constructor = Constructors.getMatchingConstructor(dataSourceClass, matcher);
 		return constructor.newInstance(parameters, dataProperties);
 	}
 
