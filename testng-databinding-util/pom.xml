@@ -9,4 +9,19 @@
 	<artifactId>testng-databinding-util</artifactId>
 	<name>TestNG DataBinding Utilities</name>
 	<description>Data binding framework utilities</description>
+	<dependencies>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.6</version>
+		</dependency>
+		
+		<!-- Test Dependencies -->
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+			<version>6.8</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
 </project>
