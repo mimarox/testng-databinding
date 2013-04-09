@@ -42,7 +42,7 @@ import net.sf.testng.databinding.util.MethodParameter;
  * <p>
  * The following table gives an overview of the required and optional data property keys for this
  * data source.
- * <p>
+ * </p><p>
  * <table border="1">
  * <tr>
  * <td><b>Key</b></td>
@@ -147,6 +147,14 @@ public class PropertiesDataSource extends AbstractDataSource {
 	private final List<MethodParameter> outputParameters = new ArrayList<MethodParameter>();
 	private boolean returnedData = false;
 
+	/**
+	 * Constructs a new instance of this class, setting the {@link MethodParameter test method parameters} to load the
+	 * data for and the {@link Properties properties} describing where to load the data from.
+	 * 
+	 * @param parameters The test method parameters for which data is to be loaded
+	 * @param properties The properties describing where to load the data from
+	 * @throws Exception If anything goes wrong during the creation of this instance
+	 */
 	public PropertiesDataSource(final List<MethodParameter> parameters, final Properties properties) throws Exception {
 		checkProperties(properties);
 		inputValuePrefix = properties.getProperty("inputValuePrefix", "in_");
@@ -231,6 +239,9 @@ public class PropertiesDataSource extends AbstractDataSource {
 		return nkData;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public boolean hasNext() {
 		if (returnedData) {
@@ -240,6 +251,9 @@ public class PropertiesDataSource extends AbstractDataSource {
 		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Object[] next() {
 		returnedData = true;
