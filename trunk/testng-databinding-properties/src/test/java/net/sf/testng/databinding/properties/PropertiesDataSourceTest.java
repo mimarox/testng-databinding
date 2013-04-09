@@ -11,14 +11,13 @@ import java.util.Properties;
 import net.sf.testng.databinding.GenericDataProvider;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
-import net.sf.testng.databinding.properties.PropertiesDataSource;
+import net.sf.testng.databinding.properties.beans.NestingTestBean;
 import net.sf.testng.databinding.properties.beans.TestBean;
 import net.sf.testng.databinding.properties.beans.TestEnum;
 import net.sf.testng.databinding.util.MethodParameter;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 
 public class PropertiesDataSourceTest {
 	private Method methodParametersCreator;
@@ -85,6 +84,21 @@ public class PropertiesDataSourceTest {
 		assertFalse(provider.hasNext());
 	}
 
+	@Test
+	public void testNestingTestBean() throws Exception {
+		final List<MethodParameter> parameters = createMethodParameters("nestingBeanConsumer");
+
+		final Properties properties = new Properties();
+		properties.setProperty("url", "/beanAllValuesSet.properties");
+
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
+
+		assertTrue(provider.hasNext());
+		assertEquals(provider.next(), new Object[] { new NestingTestBean("Hello World!", new TestBean("Hello World!",
+			10, 5.3f, TestEnum.one)) });
+		assertFalse(provider.hasNext());
+	}
+
 	@SuppressWarnings("unchecked")
 	private List<MethodParameter> createMethodParameters(final String methodName) throws Exception {
 		for (final Method method : getClass().getMethods()) {
@@ -100,10 +114,13 @@ public class PropertiesDataSourceTest {
 			@TestOutput(name = "double") final double outDouble) {
 	}
 
-	public void primitivesAndEnumConsumer(@TestInput(name = "integer") final int inInt, @TestInput final TestEnum testEnum,
-			@TestOutput(name = "boolean") final boolean outBoolean) {
+	public void primitivesAndEnumConsumer(@TestInput(name = "integer") final int inInt,
+			@TestInput final TestEnum testEnum, @TestOutput(name = "boolean") final boolean outBoolean) {
 	}
 
 	public void beanConsumer(@TestInput final TestBean testBean) {
+	}
+
+	public void nestingBeanConsumer(@TestInput final NestingTestBean nestingTestBean) {
 	}
 }

@@ -52,7 +52,7 @@ import net.sf.testng.databinding.util.MethodParameter;
  * <p>
  * The following table gives an overview of the required and optional data property keys for this
  * data source.
- * <p>
+ * </p><p>
  * <table border="1">
  * <tr>
  * <td><b>Key</b></td>

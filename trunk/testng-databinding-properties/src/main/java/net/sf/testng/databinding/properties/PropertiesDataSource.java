@@ -17,6 +17,7 @@ import java.util.Properties;
 
 import net.sf.testng.databinding.AbstractDataSource;
 import net.sf.testng.databinding.DataSource;
+import net.sf.testng.databinding.IDataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.core.error.ErrorCollector;
@@ -27,6 +28,115 @@ import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
 
+/**
+ * <p>
+ * This {@link IDataSource data source} binds test data contained in {@link Properties} files to
+ * test method parameters. It supports an arbitrary number of {@link TestInput test input} and
+ * {@link TestOutput test output} parameters and supports all generally supported parameter types for
+ * input and output parameters, except {@link List Lists}. These types are all primitive types defined
+ * in the Java Language Specification and their wrappers, {@link String Strings}, {@link Enum Enums},
+ * and Java Beans. Properties data sources always contain data for just one test method invocation.
+ * </p>
+ * <h3>Specifications</h3>
+ * <h4>Data Properties</h4>
+ * <p>
+ * The following table gives an overview of the required and optional data property keys for this
+ * data source.
+ * <p>
+ * <table border="1">
+ * <tr>
+ * <td><b>Key</b></td>
+ * <td><b>Possible Values</b></td>
+ * <td><b>Default Value</b></td>
+ * <td><b>Description</b></td>
+ * <td><b>Required</b></td>
+ * </tr>
+ * <tr>
+ * <td>dataSource</td>
+ * <td><code>properties</code></td>
+ * <td>N/A</td>
+ * <td>The name of this data source</td>
+ * <td>Yes</td>
+ * </tr>
+ * <tr>
+ * <td>url</td>
+ * <td>A {@link URL} conformant {@link String} for an absolute<br>
+ * locator or a relative path starting with a<br>
+ * slash (/)</td>
+ * <td>N/A</td>
+ * <td>The locator of the actual data source file</td>
+ * <td>Yes</td>
+ * </tr>
+ * <tr>
+ * <td>inputValuePrefix</td>
+ * <td>any {@link String}, can also be empty</td>
+ * <td><code>in_</code></td>
+ * <td>The prefix of keys for test input data</td>
+ * <td>No</td>
+ * </tr>
+ * <tr>
+ * <td>outputValuePrefix</td>
+ * <td>any {@link String}, can also be empty</td>
+ * <td><code>out_</code></td>
+ * <td>The prefix of keys for test output data</td>
+ * <td>No</td>
+ * </tr>
+ * </table>
+ * </p>
+ * <h4>Properties Files</h4>
+ * <p>
+ * The properties files must follow the standards defined by the {@link Properties} class. The property keys
+ * have no name spaces, but must have the prefixes as defined in the data properties file, or the defaults
+ * if they are not defined. Following the prefix each key must be the name as defined by
+ * {@link TestInput#name() &#64;TestInput(name = "")} or {@link TestOutput#name() &#64;TestOutput(name = "")}
+ * for any primitive value, primitive wrapper or {@link String}. For {@link Enum enums} the name returned from
+ * {@link Class#getSimpleName() EnumType.class.getSimpleName()} needs to be used. All names are case-insensitive.
+ * </p>
+ * <h4>Java Beans</h4>
+ * <p>
+ * Java Beans that data is to be bound to need to have a standard constructor taking no arguments. The same types that are
+ * supported as test method parameter types are also supported as Java Bean properties types. Nested Java Beans are
+ * supported up to any nesting level (nesting is only limited by the max allowable method stack size of the used JVM which
+ * generally allows thousands of levels). Primitive Java Bean properties for which no values can be found are set to the
+ * default value of the type. All Java Bean type properties are initialized and all properties of unsupported types are
+ * set to <code>null</code>.
+ * </p>
+ * <h3>Example</h3>
+ * <p>
+ * To make issues clearer, here is an example of this data source in use. It loads login credentials from a properties
+ * file. Getters and setters are omitted in Java Beans for brevity in this example. They are however crucial in actual
+ * Java Beans, so you have to include them in any Java Bean you actually want to bind data to.
+ * </p>
+ * <h4>Test Method</h4>
+ * <pre>
+ * &#64;DataBinding(propertiesPrefix = "login")
+ * public void loadLoginCredentials(&#64;TestInput final LoginCredentials loginCredentials) {
+ *     this.loginCredentials = loginCredentials
+ * }
+ * </pre>
+ * <h4>Java Classes</h4>
+ * <h5>Java Bean: LoginCredentials</h5>
+ * <pre>
+ * public class LoginCredentials {
+ *     private String userName;
+ *     private String password;
+ *     
+ *     /* Getters and setters omitted for brevity &#42;/
+ * }
+ * </pre>
+ * <h4>Data Properties File</h4>
+ * <pre>
+ * login.dataSource=properties
+ * login.url=/data/loginCredentials.properties
+ * </pre>
+ * <h4>Properties Data Source</h4>
+ * <pre>
+ * in_userName=admin
+ * in_password=admin
+ * </pre>
+ * 
+ * @author Matthias Rothe
+ */
 @DataSource(name = "properties")
 public class PropertiesDataSource extends AbstractDataSource {
 	private final Properties data;
