@@ -102,17 +102,48 @@ import net.sf.testng.databinding.util.MethodParameter;
  * transform.source.url=/data/transform/source.txt
  * transform.mergedIn.url=/data/transform/mergedIn.txt
  * transform.target.url=/data/transform/target.txt
- * transform.boundary=---abc---
+ * transform.boundary=---a_boundary---
  * </pre>
  * <h4>Text Data Sources</h4>
  * <h5>source.txt</h5>
  * <pre>
+ * 01234
+ * ABCDE
+ * KLMNO
+ * UVWXY
+ * ---a_boundary---
+ * 11235
+ * 81321
+ * 21138
+ * 53211
  * </pre>
  * <h5>mergedIn.txt</h5>
  * <pre>
+ * 56789
+ * FGHIJ
+ * PQRST
+ * ---a_boundary---
+ * ilike
+ * texts
  * </pre>
  * <h5>target.txt</h5>
  * <pre>
+ * 01234
+ * 56789
+ * ABCDE
+ * FGHIJ
+ * KLMNO
+ * PQRST
+ * UVWXY
+ * ---a_boundary---
+ * 11235
+ * ilike
+ * 81321
+ * texts
+ * 21138
+ * ilike
+ * 53211
+ * texts
  * </pre>
  * 
  * @author Matthias Rothe
