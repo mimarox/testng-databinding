@@ -161,7 +161,7 @@ public class GenericDataProvider {
 				declaringClass = dataBinding.declaringClass();
 			}
 
-			if (dataBinding.propertiesPrefix() != propertiesPrefix) {
+			if (!"".equals(dataBinding.propertiesPrefix()) && !propertiesPrefix.equals(dataBinding.propertiesPrefix())) {
 				propertiesPrefix = dataBinding.propertiesPrefix();
 			}
 
