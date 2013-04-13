@@ -4,6 +4,7 @@ import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -18,10 +19,15 @@ import net.sf.testng.databinding.core.error.MultipleSourceErrorsException;
 import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
-
 import au.com.bytecode.opencsv.CSVReader;
 
-
+/**
+ * Maps the column names in the first line (header line) of the CSV file to the names of the
+ * {@link MethodParameter method parameters}. Takes input and output column prefixes into account, mapping the
+ * input and output columns to {@link TestInput test input} and {@link TestOutput test output} parameters.
+ * 
+ * @author Matthias Rothe
+ */
 public class HeaderNameMapper extends Mapper {
 	private String inputColumnPrefix;
 	private String outputColumnPrefix;
@@ -29,6 +35,13 @@ public class HeaderNameMapper extends Mapper {
 	private List<MethodParameter> inputParameters = new ArrayList<MethodParameter>();
 	private List<MethodParameter> outputParameters = new ArrayList<MethodParameter>();
 
+	/**
+	 * Constructor taking a {@link List list} of {@link MethodParameter method parameters} to bind the data to and
+	 * {@link Properties configuration properties} specifying how the CSV file is defined and how to bind the data.
+	 * 
+	 * @param parameters The test method parameters
+	 * @param properties The configuration properties
+	 */
 	public HeaderNameMapper(List<MethodParameter> parameters, Properties properties) {
 		super(parameters, properties);
 
@@ -44,22 +57,37 @@ public class HeaderNameMapper extends Mapper {
 		}
 	}
 
+	/**
+	 * @return The input column prefix
+	 */
 	protected final String getInputColumnPrefix() {
 		return this.inputColumnPrefix;
 	}
 
+	/**
+	 * @return The output column prefix
+	 */
 	protected final String getOutputColumnPrefix() {
 		return this.outputColumnPrefix;
 	}
 
+	/**
+	 * @return The {@link List list} of {@link TestInput test input} {@link MethodParameter method parameters}
+	 */
 	protected final List<MethodParameter> getInputParameters() {
 		return this.inputParameters;
 	}
 
+	/**
+	 * @return The {@link List list} of {@link TestOutput test output} {@link MethodParameter method parameters}
+	 */
 	protected final List<MethodParameter> getOutputParameters() {
 		return this.outputParameters;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected List<ErrorCollector> checkParameters(List<MethodParameter> parameters) {
 		List<ErrorCollector> errorCollectors = new ArrayList<ErrorCollector>();
@@ -69,7 +97,7 @@ public class HeaderNameMapper extends Mapper {
 
 			if (Types.isEnumType(type) || Types.isListOfObjectsType(type)) {
 				ErrorCollector errorCollector = new ErrorCollector(type);
-				errorCollector.addError("Type " + type + " is not supported " + "by this mapper: " + this.getClass());
+				errorCollector.addError("Type " + type + " is not supported by this mapper: " + this.getClass());
 				errorCollectors.add(errorCollector);
 			}
 		}
@@ -77,6 +105,9 @@ public class HeaderNameMapper extends Mapper {
 		return errorCollectors;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public void init(CSVReader csvReader) throws Exception {
 		String[] headerLine = csvReader.readNext();
@@ -99,6 +130,13 @@ public class HeaderNameMapper extends Mapper {
 		this.headers = normalizedHeaders;
 	}
 
+	/**
+	 * Checks whether all required headers are contained in the CSV file. Returns a {@link List list} of
+	 * {@link ErrorCollector error collectors} containing any errors found.
+	 * 
+	 * @return The list of error collectors
+	 * @throws Exception if anything goes wrong during header checking
+	 */
 	protected List<ErrorCollector> checkHeaders() throws Exception {
 		List<ErrorCollector> errorCollectors = new ArrayList<ErrorCollector>();
 
@@ -108,7 +146,18 @@ public class HeaderNameMapper extends Mapper {
 		return errorCollectors;
 	}
 
-	protected List<ErrorCollector> checkHeaders(List<MethodParameter> parameters, String prefix) throws IntrospectionException {
+	/**
+	 * Checks whether all headers required by the given {@link List list} of {@link MethodParameter method parameters}
+	 * are contained in the CSV file with the given prefix. Returns a {@link List list} of
+	 * {@link ErrorCollector error collectors} containing any errors found.
+	 * 
+	 * @param parameters The test method parameters for which the headers are checked
+	 * @param prefix The column name prefix of the headers to be checked
+	 * @return The list of error collectors
+	 * @throws IntrospectionException if anything goes wrong during Java Bean introspection
+	 */
+	protected List<ErrorCollector> checkHeaders(List<MethodParameter> parameters, String prefix)
+			throws IntrospectionException {
 		List<ErrorCollector> errorCollectors = new ArrayList<ErrorCollector>();
 
 		for (MethodParameter parameter : parameters) {
@@ -130,6 +179,15 @@ public class HeaderNameMapper extends Mapper {
 		return errorCollectors;
 	}
 
+	/**
+	 * Checks whether the header for the given primitive type and name is contained in the CSV file with the given
+	 * prefix. Returns an {@link ErrorCollector error collector} containing the error if the header cannot be found.
+	 * 
+	 * @param type The primitive type of the method parameter
+	 * @param name The name of the method parameter
+	 * @param prefix The column prefix of the header
+	 * @return The error collector
+	 */
 	protected ErrorCollector checkPrimitiveTypeHeaders(Type type, String name, String prefix) {
 		ErrorCollector errorCollector = new ErrorCollector(type, name);
 
@@ -140,6 +198,15 @@ public class HeaderNameMapper extends Mapper {
 		return errorCollector;
 	}
 
+	/**
+	 * Checks whether all headers required by the given Java Bean type are contained in the CSV file with the given
+	 * prefix. Returns an {@link ErrorCollector error collector} containing any error found.
+	 * 
+	 * @param type The Java Bean type of the method parameter
+	 * @param prefix The column prefix of the header
+	 * @return The error collector
+	 * @throws IntrospectionException if anything goes wrong during Java Bean introspection
+	 */
 	protected ErrorCollector checkSingleBeanHeaders(Class<?> type, String prefix) throws IntrospectionException {
 		ErrorCollector errorCollector = new ErrorCollector(type);
 
@@ -157,6 +224,14 @@ public class HeaderNameMapper extends Mapper {
 		return descriptor.getWriteMethod() != null;
 	}
 
+	/**
+	 * Checks whether a header with the given prefix and name is contained in the CSV file.
+	 * 
+	 * @param prefix The column prefix
+	 * @param name The header name
+	 * @return <code>true</code>, if and only if a header with the given prefix and name is contained
+	 * in the CSV file, <code>false</code> otherwise
+	 */
 	protected boolean headersContain(String prefix, String name) {
 		return this.headers.contains(this.createHeader(prefix, name));
 	}
@@ -165,6 +240,9 @@ public class HeaderNameMapper extends Mapper {
 		return (prefix + name).toLowerCase();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Object[] createBeans(String[] line) {
 		List<Object> objects = new ArrayList<Object>();
@@ -180,6 +258,16 @@ public class HeaderNameMapper extends Mapper {
 		return objects.toArray();
 	}
 
+	/**
+	 * Creates the object for the given {@link MethodParameter method parameter} taking the appropriate value(s) from
+	 * the given {@link String string array} representing the current line from the CSV file. The given prefix is
+	 * used to retrieve the correct header(s) corresponding to the given {@link MethodParameter method parameter}.
+	 * 
+	 * @param parameter The test method parameter for which to create the object
+	 * @param line The current line from the CSV file
+	 * @param prefix The column prefix
+	 * @return The created object
+	 */
 	protected Object createObject(MethodParameter parameter, String[] line, String prefix) {
 		Type type = parameter.getType();
 
@@ -193,10 +281,48 @@ public class HeaderNameMapper extends Mapper {
 		}
 	}
 
+	/**
+	 * Creates the primitive value for the given {@link MethodParameter method parameter} taking the appropriate value
+	 * from the given {@link String string array} representing the current line from the CSV file. The given prefix is
+	 * used to retrieve the correct header corresponding to the given {@link MethodParameter method parameter}.
+	 * 
+	 * @param parameter The test method parameter for which to create the object
+	 * @param line The current line from the CSV file
+	 * @param prefix The column prefix
+	 * @return The created primitive value
+	 */
 	protected Object createPrimitive(MethodParameter parameter, String[] line, String prefix) {
-		return line[this.getHeaderIndexFor(prefix, parameter.getName())];
+		final String value = line[this.getHeaderIndexFor(prefix, parameter.getName())];
+		final Type type = parameter.getType();
+
+		if (type.equals(String.class)) {
+			return value;
+		} else if (type == Integer.class || type == int.class) {
+			return Integer.parseInt(value);
+		} else if (type == Long.class || type == long.class) {
+			return Long.parseLong(value);
+		} else if (type == Float.class || type == float.class) {
+			return Float.parseFloat(value);
+		} else if (type == Double.class || type == double.class) {
+			return Double.parseDouble(value);
+		} else if (type == Boolean.class || type == boolean.class) {
+			return Boolean.parseBoolean(value);
+		}
+
+		// can't happen
+		throw new RuntimeException();
 	}
 
+	/**
+	 * Creates the Java Bean for the given {@link MethodParameter method parameter} taking the appropriate values
+	 * from the given {@link String string array} representing the current line from the CSV file. The given prefix is
+	 * used to retrieve the correct header corresponding to the given {@link MethodParameter method parameter}.
+	 * 
+	 * @param parameter The test method parameter for which to create the object
+	 * @param line The current line from the CSV file
+	 * @param prefix The column prefix
+	 * @return The created Java Bean
+	 */
 	protected Object createSingleBean(MethodParameter parameter, String[] line, String prefix) {
 		try {
 			Class<?> clazz = (Class<?>) parameter.getType();
@@ -204,8 +330,8 @@ public class HeaderNameMapper extends Mapper {
 			BeanInfo info = Introspector.getBeanInfo(clazz);
 
 			for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {
-				if (this.isWriteable(descriptor)) {
-					String value = line[this.getHeaderIndexFor(prefix, descriptor.getName())];
+				if (this.isWriteable(descriptor) && isPrimitiveType(descriptor)) {
+					Object value = createPrimitive(createMethodParameterForProperty(descriptor), line, prefix);
 					Method writeMethod = descriptor.getWriteMethod();
 					writeMethod.invoke(object, value);
 				}
@@ -217,6 +343,24 @@ public class HeaderNameMapper extends Mapper {
 		}
 	}
 
+	private boolean isPrimitiveType(PropertyDescriptor descriptor) {
+		return Types.isPrimitiveType(descriptor.getPropertyType());
+	}
+
+	private MethodParameter createMethodParameterForProperty(final PropertyDescriptor descriptor) {
+		final Method writeMethod = descriptor.getWriteMethod();
+		final Annotation[][] annotations = writeMethod.getParameterAnnotations();
+		final Type[] parameterTypes = writeMethod.getGenericParameterTypes();
+		return new MethodParameter(Arrays.asList(annotations[0]), parameterTypes[0], descriptor.getName());
+	}
+
+	/**
+	 * Retrieves the index of the header specified by the given prefix and name.
+	 * 
+	 * @param prefix The column prefix
+	 * @param name The header name
+	 * @return The index of the header, or -1 if no such header exists
+	 */
 	protected int getHeaderIndexFor(String prefix, String name) {
 		return this.headers.indexOf((prefix + name).toLowerCase());
 	}

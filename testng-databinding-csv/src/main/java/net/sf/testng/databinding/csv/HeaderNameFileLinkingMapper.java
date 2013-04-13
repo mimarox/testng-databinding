@@ -9,20 +9,43 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 
+import net.sf.testng.databinding.TestInput;
+import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.core.error.ErrorCollector;
 import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
 
-
+/**
+ * Maps the column names in the first line (header line) of the CSV file to the names of the
+ * {@link MethodParameter method parameters}. Takes input and output column prefixes into account, mapping the
+ * input and output columns to {@link TestInput test input} and {@link TestOutput test output} parameters, and
+ * supports a linking column prefix. The linking column allows binding a dependent CSV file per line of the main
+ * CSV file to a {@link List} of Java Beans for a {@link TestOutput test output} parameter.
+ * <p>
+ * As all configuration properties are reused for binding any dependent CSV file all dependent CSV files need to
+ * have the same structure as the main CSV file. Dependent CSV files cannot have another linking column set again.
+ * 
+ * @author Matthias Rothe
+ */
 public class HeaderNameFileLinkingMapper extends HeaderNameMapper {
 	private final String linkingColumnPrefix;
 
+	/**
+	 * Constructor taking a {@link List list} of {@link MethodParameter method parameters} to bind the data to and
+	 * {@link Properties configuration properties} specifying how the CSV file is defined and how to bind the data.
+	 * 
+	 * @param parameters The test method parameters
+	 * @param properties The configuration properties
+	 */
 	public HeaderNameFileLinkingMapper(final List<MethodParameter> parameters, final Properties properties) {
 		super(parameters, properties);
 		this.linkingColumnPrefix = properties.getProperty("linkingColumnPrefix", "link_");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected List<ErrorCollector> checkParameters(final List<MethodParameter> parameters) {
 		final List<ErrorCollector> errorCollectors = new ArrayList<ErrorCollector>();
@@ -41,6 +64,9 @@ public class HeaderNameFileLinkingMapper extends HeaderNameMapper {
 		return errorCollectors;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	protected List<ErrorCollector> checkHeaders() throws Exception {
 		final List<ErrorCollector> errorCollectors = new ArrayList<ErrorCollector>();
@@ -102,6 +128,9 @@ public class HeaderNameFileLinkingMapper extends HeaderNameMapper {
 		return errorCollector;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	@Override
 	public Object[] createBeans(final String[] line) {
 		final List<Object> objects = new ArrayList<Object>();
