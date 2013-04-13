@@ -12,8 +12,8 @@ import java.util.Properties;
 import net.sf.testng.databinding.GenericDataProvider;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
+import net.sf.testng.databinding.core.error.MultipleSourceErrorsException;
 import net.sf.testng.databinding.util.MethodParameter;
-import net.sf.testng.databinding.xml.XMLDataSource;
 import net.sf.testng.databinding.xml.beans.BeanWithMap;
 import net.sf.testng.databinding.xml.beans.IESTestBean;
 import net.sf.testng.databinding.xml.beans.InnerTestBean;
@@ -22,7 +22,6 @@ import net.sf.testng.databinding.xml.beans.TestEnum;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
 
 public class XMLDataSourceTest {
 	private Method methodParametersCreator;
@@ -45,6 +44,19 @@ public class XMLDataSourceTest {
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { "Hello World!" });
 		assertFalse(provider.hasNext());
+	}
+
+	@Test(groups = { "singleRow", "singleInputValue", "primitiveInputValue" }, timeOut = 1000, expectedExceptions = MultipleSourceErrorsException.class)
+	public void testSingleRowSingleStringInputValueTestData_NoData() throws Exception {
+		final List<MethodParameter> parameters = createMethodParameters("singleStringInputValueConsumer");
+
+		final Properties properties = new Properties();
+		properties.setProperty("url", "/singleRowSingleStringInputValueTestData-noData.xml");
+
+		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+
+		assertTrue(provider.hasNext());
+		provider.next();
 	}
 
 	@Test(groups = { "singleRow", "singleInputValue", "enumInputValue" }, timeOut = 1000)
@@ -124,7 +136,8 @@ public class XMLDataSourceTest {
 	public void testInputOutputValuesTestData() throws Exception {
 		final Object[][] expecteds = new Object[][] {
 				{ true, new TestBean(), TestEnum.one, Arrays.asList("a", "b", "c"), Arrays.asList("1", "2", "3") },
-				{ false, setupComplexTestBean(), TestEnum.three, Arrays.asList("9", "8", "7"), Arrays.asList("z", "y", "x") } };
+				{ false, setupComplexTestBean(), TestEnum.three, Arrays.asList("9", "8", "7"),
+						Arrays.asList("z", "y", "x") } };
 
 		final List<MethodParameter> parameters = createMethodParameters("inputOutputValuesConsumer");
 
@@ -182,7 +195,7 @@ public class XMLDataSourceTest {
 		testBean.setTestBooleans(Arrays.asList(true, false, true));
 		testBean.setInnerTestBean(new InnerTestBean("test value"));
 		testBean.setTestBeans(Arrays.asList(new InnerTestBean("list entry 1"), new InnerTestBean("list entry 2"),
-				new InnerTestBean("list entry 3")));
+			new InnerTestBean("list entry 3")));
 		return testBean;
 	}
 
@@ -212,12 +225,14 @@ public class XMLDataSourceTest {
 
 	public void inputOutputValuesConsumer(@TestInput(name = "testChoice") final boolean testChoice,
 			@TestOutput final TestBean testBean, @TestInput final TestEnum testEnum,
-			@TestOutput(name = "strings") final List<String> outStrings, @TestInput(name = "strings") final List<String> inStrings) {
+			@TestOutput(name = "strings") final List<String> outStrings,
+			@TestInput(name = "strings") final List<String> inStrings) {
 	}
 
 	public void beanWithMapConsumer(@TestInput final BeanWithMap testBean) {
 	}
 
-	public void listWithIESConsumer(@TestInput(name = "entries") final List<String> entries, @TestInput final IESTestBean bean) {
+	public void listWithIESConsumer(@TestInput(name = "entries") final List<String> entries,
+			@TestInput final IESTestBean bean) {
 	}
 }
