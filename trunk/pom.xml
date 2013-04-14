@@ -7,7 +7,7 @@
 	</parent>
 	<groupId>net.sf.testngdatabind</groupId>
 	<artifactId>testng-databinding</artifactId>
-	<version>2.1-SNAPSHOT</version>
+	<version>2.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>TestNG DataBinding Parent POM</name>
 	<description>Parent POM for a data binding framework targeting TestNG</description>
