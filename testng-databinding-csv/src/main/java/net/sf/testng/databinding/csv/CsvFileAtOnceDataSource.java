@@ -47,7 +47,7 @@ import net.sf.testng.databinding.util.MethodParameter;
  * </tr>
  * <tr>
  * <td>dataSource</td>
- * <td><code>csv</code></td>
+ * <td><code>csv-file-at-once</code></td>
  * <td>N/A</td>
  * <td>The name of this data source</td>
  * <td>Yes</td>
