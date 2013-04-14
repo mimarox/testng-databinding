@@ -22,9 +22,50 @@ import net.sf.testng.databinding.util.MethodParameter;
 import au.com.bytecode.opencsv.CSVReader;
 
 /**
+ * <p>
  * Maps the column names in the first line (header line) of the CSV file to the names of the
  * {@link MethodParameter method parameters}. Takes input and output column prefixes into account, mapping the
  * input and output columns to {@link TestInput test input} and {@link TestOutput test output} parameters.
+ * </p>
+ * <h3>Example</h3>
+ * <p>
+ * This example loads test input and output data for testing a <code>public static boolean isBetween(int value,
+ * int lower, int upper)</code> application method. The test input values are bound to a Java Bean, the test
+ * output value is a single boolean primitive value. Getters and setters are omitted in the Java Bean for
+ * brevity in this example. They are however crucial in actual Java Beans, so you have to include them in any
+ * Java Bean you actually want to bind data to.
+ * </p>
+ * <h4>Test Method</h4>
+ * <pre>
+ * &#64;DataBinding(propertiesPrefix = "isBetween")
+ * public void testIsBetween(&#64;TestInput CheckData data, &#64;TestOutput(name = "expected") boolean expected) {
+ *     assertEquals(isBetween(data.getValue(), data.getLower(), data.getUpper()), expected);
+ * }
+ * </pre>
+ * <h4>Java Bean: CheckData</h4>
+ * <pre>
+ * public class CheckData {
+ *     private int value;
+ *     private int lower;
+ *     private int upper;
+ *     
+ *     /* Getters and setters omitted for brevity &#42;/
+ * }
+ * </pre>
+ * <h4>Data Properties File</h4>
+ * <pre>
+ * isBetween.dataSource=csv
+ * isBetween.url=/data/isBetween.csv
+ * </pre>
+ * <h4>CSV Data Source File</h4>
+ * <pre>
+ * in_value,in_lower,in_upper,out_expected
+ * -10,-5,10,false
+ * -5,-5,10,true
+ * 0,-5,10,true
+ * 10,-5,10,true
+ * 20,-5,10,false
+ * </pre>
  * 
  * @author Matthias Rothe
  */

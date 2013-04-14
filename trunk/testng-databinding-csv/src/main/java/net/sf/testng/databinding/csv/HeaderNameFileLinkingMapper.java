@@ -17,14 +17,78 @@ import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
 
 /**
+ * <p>
  * Maps the column names in the first line (header line) of the CSV file to the names of the
  * {@link MethodParameter method parameters}. Takes input and output column prefixes into account, mapping the
  * input and output columns to {@link TestInput test input} and {@link TestOutput test output} parameters, and
  * supports a linking column prefix. The linking column allows binding a dependent CSV file per line of the main
  * CSV file to a {@link List} of Java Beans for a {@link TestOutput test output} parameter.
- * <p>
+ * </p><p>
  * As all configuration properties are reused for binding any dependent CSV file all dependent CSV files need to
  * have the same structure as the main CSV file. Dependent CSV files cannot have another linking column set again.
+ * All dependent CSV files need to be placed in the same location as the main CSV file, as the path to the main
+ * CSV file is prepended to the name of the dependent CSV file to locate it. So if the path to the main CSV file
+ * is /path/to/main.csv and it contains a link to a dependent.csv file, the path to the linked file must be
+ * /path/to/dependent.csv.
+ * </p>
+ * <h3>Example</h3>
+ * <p>
+ * This example loads test input and output data for testing selected ranges of a <code>public static
+ * List&lt;Integer&gt; getPrimesInRange(int lowerBound, int upperBound, boolean includingBounds)</code> application
+ * method. The bounds are loaded into a Java Bean, the <code>includingBounds</code> parameter is loaded as a boolean
+ * primitive and the expected values for each range are loaded from a dependent CSV file as a {@link List list} of
+ * {@link Integer integers}. Getters and setters are omitted in the Java Bean for brevity in this example. They are
+ * however crucial in actual Java Beans, so you have to include them in any Java Bean you actually want to bind data
+ * to.
+ * </p>
+ * <h4>Test Method</h4>
+ * <pre>
+ * &#64;DataBinding(propertiesPrefix = "primesInRange")
+ * public void testGetPrimesInRange(&#64;TestInput Bounds bounds, &#64;TestInput(name = "includingBounds") boolean includingBounds,
+ *         &#64;TestOutput(name = "primes") List&lt;Integer&gt; primes) {
+ *     assertEquals(getPrimesInRange(bounds.getLower(), bounds.getUpper(), includingBounds), primes);
+ * }
+ * </pre>
+ * <h4>Java Bean: Bounds</h4>
+ * <pre>
+ * public class Bounds {
+ *     private int lower;
+ *     private int upper;
+ *     
+ *     /* Getters and setters omitted for brevity &#42;/
+ * }
+ * </pre>
+ * <h4>Data Properties File</h4>
+ * <pre>
+ * primesInRange.dataSource=csv
+ * primesInRange.url=/data/primeRanges.csv
+ * primesInRange.mapper=headerNameFileLinkingMapper
+ * </pre>
+ * <h4>CSV Data Files</h4>
+ * <h5>primeRanges.csv</h5>
+ * <pre>
+ * in_lower,in_upper,in_includingBounds,link_primes
+ * 2,11,true,2-to-11-primes.csv
+ * 13,37,false,13-to-37-primes.csv
+ * </pre>
+ * <h5>2-to-11-primes.csv</h5>
+ * <pre>
+ * out_primes
+ * 2
+ * 3
+ * 5
+ * 7
+ * 11
+ * </pre>
+ * <h5>13-to-37-primes.csv</h5>
+ * <pre>
+ * out_primes
+ * 17
+ * 19
+ * 23
+ * 29
+ * 31
+ * </pre>
  * 
  * @author Matthias Rothe
  */
