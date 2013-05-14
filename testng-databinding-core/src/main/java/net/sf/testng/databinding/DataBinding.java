@@ -30,6 +30,9 @@ import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
  * ignored if used at class level and defaults will be used. If parameter values other than the
  * defaults are needed for any test method in a test class annotated with this annotation that
  * test method needs to also be annotated with this annotation specifying the parameters as needed.
+ * <p>
+ * Join the <a href="http://facebook.com/TestNGDataBinding" target="_blank">TestNG Data Binding community on Facebook</a> to always stay up to date and discuss issues
+ * with other users!
  * 
  * @author Matthias Rothe
  * @see GenericDataProvider
