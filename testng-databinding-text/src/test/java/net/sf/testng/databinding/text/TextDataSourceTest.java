@@ -6,16 +6,17 @@ import static org.testng.Assert.fail;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Properties;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import net.sf.testng.databinding.DataSource;
 import net.sf.testng.databinding.GenericDataProvider;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
+import net.sf.testng.databinding.core.model.Configuration;
+import net.sf.testng.databinding.text.datasource.config.TextDataSourceConfigurations;
 import net.sf.testng.databinding.util.MethodParameter;
-
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 public class TextDataSourceTest {
 	private Method methodParametersCreator;
@@ -61,17 +62,11 @@ public class TextDataSourceTest {
 	private TextDataSource createTextDataSource(final boolean useBoundary) throws Exception {
 		List<MethodParameter> parameters = createMethodParameters("multiValueConsumer");
 
-		Properties properties = new Properties();
-		properties.setProperty("input1.url", "/multiValue/input1.txt");
-		properties.setProperty("input2.url", "/multiValue/input2.txt");
-		properties.setProperty("output1.url", "/multiValue/output1.txt");
-		properties.setProperty("output2.url", "/multiValue/output2.txt");
-
-		if (useBoundary) {
-			properties.setProperty("boundary", "---123---");
-		}
-
-		return new TextDataSource(parameters, properties);
+		Configuration configuration = useBoundary ?
+				new Configuration(TextDataSourceConfigurations.class, "withBoundaryConfig") :
+					new Configuration(TextDataSourceConfigurations.class, "withoutBoundaryConfig");
+		
+		return new TextDataSource(parameters, configuration);
 	}
 
 	private Object[][] createMultiValueWithBoundaryExpecteds() {

@@ -17,7 +17,7 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public abstract class Mapper {
 	private List<MethodParameter> parameters;
-	private Properties properties;
+	private CsvDataSourceConfiguration configuration;
 
 	/**
 	 * Constructor taking a {@link List list} of {@link MethodParameter method parameters} to bind the data to and
@@ -26,14 +26,14 @@ public abstract class Mapper {
 	 * @param parameters The test method parameters
 	 * @param properties The configuration properties
 	 */
-	public Mapper(List<MethodParameter> parameters, Properties properties) {
+	public Mapper(List<MethodParameter> parameters, CsvDataSourceConfiguration configuration) {
 		List<ErrorCollector> errorCollectors = this.checkParameters(parameters);
 		if (errorCollectors.size() > 0) {
 			throw new MultipleConfigurationErrorsException(errorCollectors);
 		}
 
 		this.parameters = parameters;
-		this.properties = properties;
+		this.configuration = configuration;
 	}
 
 	/**
@@ -59,12 +59,12 @@ public abstract class Mapper {
 	}
 
 	/**
-	 * Returns the {@link Properties configuration properties}.
+	 * Returns the {@link CsvDataSourceConfiguration configuration object}.
 	 * 
-	 * @return The configuration properties
+	 * @return The configuration object
 	 */
-	protected Properties getProperties() {
-		return this.properties;
+	protected CsvDataSourceConfiguration getConfiguration() {
+		return this.configuration;
 	}
 
 	/**

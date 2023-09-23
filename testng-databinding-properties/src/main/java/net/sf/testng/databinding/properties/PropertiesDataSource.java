@@ -7,7 +7,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,9 +20,10 @@ import net.sf.testng.databinding.IDataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.core.error.ErrorCollector;
-import net.sf.testng.databinding.core.error.MissingPropertiesException;
 import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
 import net.sf.testng.databinding.core.error.MultipleSourceErrorsException;
+import net.sf.testng.databinding.core.model.Configuration;
+import net.sf.testng.databinding.core.util.DataSourceConfigurationLoader;
 import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
@@ -38,51 +38,6 @@ import net.sf.testng.databinding.util.MethodParameter;
  * and Java Beans. Properties data sources always contain data for just one test method invocation.
  * </p>
  * <h3>Specifications</h3>
- * <h4>Data Properties</h4>
- * <p>
- * The following table gives an overview of the required and optional data property keys for this
- * data source.
- * </p><p>
- * <table border="1">
- * <tr>
- * <td><b>Key</b></td>
- * <td><b>Possible Values</b></td>
- * <td><b>Default Value</b></td>
- * <td><b>Description</b></td>
- * <td><b>Required</b></td>
- * </tr>
- * <tr>
- * <td>dataSource</td>
- * <td><code>properties</code></td>
- * <td>N/A</td>
- * <td>The name of this data source</td>
- * <td>Yes</td>
- * </tr>
- * <tr>
- * <td>url</td>
- * <td>A {@link URL} conformant {@link String} for an absolute<br>
- * locator or a relative path starting with a<br>
- * slash (/)</td>
- * <td>N/A</td>
- * <td>The locator of the actual data source file</td>
- * <td>Yes</td>
- * </tr>
- * <tr>
- * <td>inputValuePrefix</td>
- * <td>any {@link String}, can also be empty</td>
- * <td><code>in_</code></td>
- * <td>The prefix of keys for test input data</td>
- * <td>No</td>
- * </tr>
- * <tr>
- * <td>outputValuePrefix</td>
- * <td>any {@link String}, can also be empty</td>
- * <td><code>out_</code></td>
- * <td>The prefix of keys for test output data</td>
- * <td>No</td>
- * </tr>
- * </table>
- * </p>
  * <h4>Properties Files</h4>
  * <p>
  * The properties files must follow the standards defined by the {@link Properties} class. The property keys
@@ -149,16 +104,20 @@ public class PropertiesDataSource extends AbstractDataSource {
 
 	/**
 	 * Constructs a new instance of this class, setting the {@link MethodParameter test method parameters} to load the
-	 * data for and the {@link Properties properties} describing where to load the data from.
+	 * data for and the {@link Configuration}.
 	 * 
 	 * @param parameters The test method parameters for which data is to be loaded
-	 * @param properties The properties describing where to load the data from
+	 * @param configuration The configuration of the configuration class and method
 	 * @throws Exception If anything goes wrong during the creation of this instance
 	 */
-	public PropertiesDataSource(final List<MethodParameter> parameters, final Properties properties) throws Exception {
-		checkProperties(properties);
-		inputValuePrefix = properties.getProperty("inputValuePrefix", "in_");
-		outputValuePrefix = properties.getProperty("outputValuePrefix", "out_");
+	public PropertiesDataSource(final List<MethodParameter> parameters,
+			final Configuration configuration) throws Exception {
+		PropertiesDataSourceConfiguration dataSourceConfiguration =
+				DataSourceConfigurationLoader.loadDataSourceConfiguration(configuration,
+						PropertiesDataSourceConfiguration.class);
+		
+		inputValuePrefix = dataSourceConfiguration.getInputValuePrefix();
+		outputValuePrefix = dataSourceConfiguration.getOutputValuePrefix();
 
 		checkParameters(parameters);
 		this.parameters = parameters;
@@ -171,20 +130,7 @@ public class PropertiesDataSource extends AbstractDataSource {
 			}
 		}
 
-		data = readData(properties);
-		// checkKeys(data.keySet());
-	}
-
-	private void checkProperties(final Properties properties) {
-		final List<String> missingKeys = new ArrayList<String>();
-
-		if (!properties.containsKey("url")) {
-			missingKeys.add("url");
-		}
-
-		if (missingKeys.size() > 0) {
-			throw new MissingPropertiesException(missingKeys);
-		}
+		data = readData(dataSourceConfiguration);
 	}
 
 	private void checkParameters(final List<MethodParameter> parameters) {
@@ -208,25 +154,14 @@ public class PropertiesDataSource extends AbstractDataSource {
 		}
 	}
 
-	private Properties readData(final Properties properties) throws Exception {
+	private Properties readData(final PropertiesDataSourceConfiguration configuration)
+			throws Exception {
 		final Properties data = new Properties();
 
-		final URL url = resolveURL(properties.getProperty("url"));
+		final URL url = configuration.getURL();
 		data.load(url.openStream());
 
 		return normalizeKeys(data);
-	}
-
-	private URL resolveURL(final String urlString) {
-		URL url;
-
-		try {
-			url = new URL(urlString);
-		} catch (final MalformedURLException e) {
-			url = getClass().getResource(urlString);
-		}
-
-		return url;
 	}
 
 	private Properties normalizeKeys(final Properties data) {
@@ -378,7 +313,7 @@ public class PropertiesDataSource extends AbstractDataSource {
 	private Object createSingleBean(final MethodParameter parameter, final String prefix) {
 		try {
 			final Class<?> clazz = (Class<?>) parameter.getType();
-			final Object object = clazz.newInstance();
+			final Object object = clazz.getConstructor().newInstance();
 			final BeanInfo info = Introspector.getBeanInfo(clazz);
 
 			for (final PropertyDescriptor descriptor : info.getPropertyDescriptors()) {

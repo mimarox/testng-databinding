@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.util.CsvConfigObject;
 
 import org.testng.annotations.Test;
 
@@ -36,7 +37,11 @@ public class GenericDataProviderTest {
 		this.dataForMethod(name, parameterTypes);
 	}
 
-	@DataBinding(propertiesPrefix = "tSB_LOB")
+	@DataBinding(
+			dataSource = "csv",
+			configClass = CsvConfigObject.class,
+			configMethod = "defaultConfig"
+	)
 	public void method_SingleBean_ListOfBeans(@TestInput TestBean input, @TestOutput List<TestBean> output) {
 	}
 
@@ -47,7 +52,11 @@ public class GenericDataProviderTest {
 		this.dataForMethod(name, parameterTypes);
 	}
 
-	@DataBinding(propertiesPrefix = "tP_LOB")
+	@DataBinding(
+			dataSource = "other",
+			configClass = CsvConfigObject.class,
+			configMethod = "defaultConfig"
+	)
 	public void method_Primitive_ListOfBeans(@TestInput(name = "input") String input, @TestOutput List<TestBean> output) {
 	}
 
@@ -58,7 +67,11 @@ public class GenericDataProviderTest {
 		this.dataForMethod(name, parameterTypes);
 	}
 
-	@DataBinding(propertiesPrefix = "tNP")
+	@DataBinding(
+			dataSource = "csv",
+			configClass = CsvConfigObject.class,
+			configMethod = "defaultConfig"
+	)
 	public void method_NoParameters() {
 	}
 }

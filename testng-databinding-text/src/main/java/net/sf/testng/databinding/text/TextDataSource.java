@@ -3,10 +3,10 @@ package net.sf.testng.databinding.text;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 
@@ -18,6 +18,8 @@ import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.core.error.ErrorCollector;
 import net.sf.testng.databinding.core.error.MissingPropertiesException;
 import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
+import net.sf.testng.databinding.core.model.Configuration;
+import net.sf.testng.databinding.core.util.DataSourceConfigurationLoader;
 import net.sf.testng.databinding.util.MethodParameter;
 
 /**
@@ -27,52 +29,6 @@ import net.sf.testng.databinding.util.MethodParameter;
  * {@link TestOutput test output} parameters, but supports only {@link String} parameters.
  * </p>
  * <h3>Specifications</h3>
- * <h4>Data Properties</h4>
- * <p>
- * The following table gives an overview of the required and optional data property keys for this
- * data source.
- * </p><p>
- * <table border="1">
- * <tr>
- * <td><b>Key</b></td>
- * <td><b>Possible Values</b></td>
- * <td><b>Default Value</b></td>
- * <td><b>Description</b></td>
- * <td><b>Required</b></td>
- * </tr>
- * <tr>
- * <td>dataSource</td>
- * <td><code>text</code></td>
- * <td>N/A</td>
- * <td>The name of this data source</td>
- * <td>Yes</td>
- * </tr>
- * <tr>
- * <td>{parameterName}.url</td>
- * <td>A {@link URL} conformant {@link String} for an absolute<br>
- * locator or a relative path starting with a<br>
- * slash (/)</td>
- * <td>N/A</td>
- * <td>The locator of the actual data source file</td>
- * <td>Yes</td>
- * </tr>
- * <tr>
- * <td>boundary</td>
- * <td>any {@link String}</td>
- * <td><code>null</code></td>
- * <td>The boundary separating the text chunks</td>
- * <td>No</td>
- * </tr>
- * <tr>
- * <td>encoding</td>
- * <td>Any name of a supported charset<br>
- * (e.g. UTF-8, ISO-8859-1, or US-ASCII)</td>
- * <td>UTF-8</td>
- * <td>The encoding of the data source file</td>
- * <td>No</td>
- * </tr>
- * </table>
- * </p>
  * <h4>Text Data Files</h4>
  * <p>
  * The text files to be bound can have several chunks of text separated by a boundary. Each chunk can span several
@@ -161,20 +117,28 @@ public class TextDataSource extends AbstractDataSource {
 	 * @param properties The properties describing where to load the data from
 	 * @throws Exception If anything goes wrong during the creation of this instance
 	 */
-	public TextDataSource(final List<MethodParameter> parameters, final Properties properties) throws Exception {
-		checkProperties(parameters, properties);
-		encoding = properties.getProperty("encoding", "UTF-8");
+	public TextDataSource(final List<MethodParameter> parameters,
+			final Configuration configuration) throws Exception {
+		TextDataSourceConfiguration dataSourceConfiguration =
+				DataSourceConfigurationLoader.loadDataSourceConfiguration(configuration,
+						TextDataSourceConfiguration.class);
+		
+		checkConfiguration(parameters, dataSourceConfiguration);
+		encoding = dataSourceConfiguration.getEncoding();
 
 		checkParameters(parameters);
-		createReaders(parameters, properties);
+		createReaders(parameters, dataSourceConfiguration);
 	}
 
-	private void checkProperties(final List<MethodParameter> parameters, final Properties properties) {
+	private void checkConfiguration(final List<MethodParameter> parameters,
+			final TextDataSourceConfiguration configuration) {
+		Map<String, URL> urls = configuration.getURLs();
+		
 		final List<String> missingKeys = new ArrayList<String>();
 
 		for (MethodParameter parameter : parameters) {
-			if (!properties.containsKey(parameter.getName() + ".url")) {
-				missingKeys.add(parameter.getName() + ".url");
+			if (!urls.containsKey(parameter.getName())) {
+				missingKeys.add(parameter.getName());
 			}
 		}
 
@@ -205,28 +169,20 @@ public class TextDataSource extends AbstractDataSource {
 		}
 	}
 
-	private void createReaders(List<MethodParameter> parameters, Properties properties) throws Exception {
+	private void createReaders(final List<MethodParameter> parameters,
+			final TextDataSourceConfiguration configuration) throws Exception {
 		readers = new ArrayList<TextFileReader>();
-		String boundary = properties.getProperty("boundary");
+		String boundary = configuration.getBoundary();
 
+		Map<String, URL> urls = configuration.getURLs();
+		
 		for (MethodParameter parameter : parameters) {
-			URL url = resolveURL(properties.getProperty(parameter.getName() + ".url"));
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(url.openStream(), encoding));
+			URL url = urls.get(parameter.getName());
+			BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(url.openStream(), encoding));
 			TextFileReader reader = new TextFileReader(bufferedReader, boundary);
 			readers.add(reader);
 		}
-	}
-
-	private URL resolveURL(final String urlString) {
-		URL url;
-
-		try {
-			url = new URL(urlString);
-		} catch (final MalformedURLException e) {
-			url = getClass().getResource(urlString);
-		}
-
-		return url;
 	}
 
 	/**

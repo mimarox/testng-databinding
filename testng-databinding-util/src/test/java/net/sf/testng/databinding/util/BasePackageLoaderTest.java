@@ -34,7 +34,7 @@ public class BasePackageLoaderTest {
 	@Test(dependsOnMethods = "shouldLoadBasePackagesFromReader")
 	public void shouldLoadBasePackagesFromClasspath() {
 		Set<String> basePackages = BasePackageLoader.loadBasePackages("testng-databinding.base-packages");
-		String[] expecteds = new String[] { "com", "net.sf", "org.testng", "net.sf.testng" };
+		String[] expecteds = new String[] { "net.sf", "com", "org.testng", "net.sf.testng" };
 		assertEquals(basePackages.toArray(), expecteds);
 
 		cached = basePackages;

@@ -2,13 +2,15 @@ package net.sf.testng.databinding.util;
 
 import java.net.URL;
 
-import net.sf.testng.databinding.DataSourceConfiguration;
+public class CsvConfigObject {
 
-@DataSourceConfiguration(name = "default")
-public class CsvConfigObject implements CsvDataSourceConfiguration {
-
-	@Override
-	public URL getURL() {
-		return null;
+	public static CsvDataSourceConfiguration defaultConfig() {
+		return new CsvDataSourceConfiguration() {
+			
+			@Override
+			public URL getURL() {
+				return null;
+			}
+		};
 	}
 }

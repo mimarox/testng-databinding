@@ -6,7 +6,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Properties;
 
 import net.sf.testng.databinding.TestInput;
@@ -102,9 +101,10 @@ public class HeaderNameFileLinkingMapper extends HeaderNameMapper {
 	 * @param parameters The test method parameters
 	 * @param properties The configuration properties
 	 */
-	public HeaderNameFileLinkingMapper(final List<MethodParameter> parameters, final Properties properties) {
-		super(parameters, properties);
-		this.linkingColumnPrefix = properties.getProperty("linkingColumnPrefix", "link_");
+	public HeaderNameFileLinkingMapper(final List<MethodParameter> parameters,
+			final CsvDataSourceConfiguration configuration) {
+		super(parameters, configuration);
+		this.linkingColumnPrefix = configuration.getLinkingColumnPrefix();
 	}
 
 	/**
@@ -229,14 +229,14 @@ public class HeaderNameFileLinkingMapper extends HeaderNameMapper {
 			final List<Object> list = new ArrayList<Object>();
 
 			final String name = parameter.getName();
-			final String link = line[this.getHeaderIndexFor(this.linkingColumnPrefix, name)];
+			final String linkKey = line[this.getHeaderIndexFor(this.linkingColumnPrefix, name)];
 
-			final Properties properties = this.copyProperties();
-			this.setLinkUrl(properties, link);
-
+			final CsvDataSourceConfiguration configuration =
+					getConfiguration().getConfiguration(linkKey);
+			
 			final List<MethodParameter> parameters = this.createParameters(parameter);
 
-			final CsvDataSource provider = new CsvDataSource(parameters, properties);
+			final CsvDataSource provider = new CsvDataSource(parameters, configuration);
 			while (provider.hasNext()) {
 				list.add(provider.next()[0]);
 			}
@@ -245,26 +245,6 @@ public class HeaderNameFileLinkingMapper extends HeaderNameMapper {
 		} catch (final Exception e) {
 			throw Exceptions.softenIfNecessary(e);
 		}
-	}
-
-	private Properties copyProperties() {
-		final Properties properties = new Properties();
-
-		for (final Entry<Object, Object> entry : this.getProperties().entrySet()) {
-			properties.put(entry.getKey(), entry.getValue());
-		}
-
-		return properties;
-	}
-
-	private void setLinkUrl(final Properties properties, final String link) {
-		final String linkUrl = this.resolveUrl(properties.getProperty("url"), link);
-		properties.setProperty("url", linkUrl);
-	}
-
-	private String resolveUrl(final String url, final String link) {
-		final String urlBase = url.substring(0, url.lastIndexOf("/"));
-		return urlBase + "/" + link;
 	}
 
 	private List<MethodParameter> createParameters(final MethodParameter parameter) {

@@ -6,7 +6,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -114,7 +114,7 @@ public class BasePackageLoader {
 		if (CACHE.containsKey(cacheKey)) {
 			basePackages = CACHE.get(cacheKey);
 		} else {
-			basePackages = new HashSet<String>();
+			basePackages = new LinkedHashSet<String>();
 			fillBasePackages(basePackages, source, classLoader);
 
 			CACHE.put(cacheKey, basePackages);

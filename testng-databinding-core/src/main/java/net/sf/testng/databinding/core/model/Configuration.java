@@ -1,34 +1,25 @@
 package net.sf.testng.databinding.core.model;
 
 public class Configuration {
-	private final String configName;
-	private final String[] basePackages;
-	private final ClassLoader classLoader;
+	private final Class<?> configClass;
+	private final String configMethod;
 	
-	public Configuration(final String configName, final String[] basePackages, ClassLoader classLoader) {
-		this.configName = configName;
-		this.basePackages = basePackages;
-		this.classLoader = classLoader;
+	public Configuration(final Class<?> configClass, final String configMethod) {
+		this.configClass = configClass;
+		this.configMethod = configMethod;
 	}
 
 	/**
-	 * @return the configName
+	 * @return the configClass
 	 */
-	public String getConfigName() {
-		return configName;
+	public Class<?> getConfigClass() {
+		return configClass;
 	}
 
 	/**
-	 * @return the basePackages
+	 * @return the configMethod
 	 */
-	public String[] getBasePackages() {
-		return basePackages;
-	}
-
-	/**
-	 * @return the classLoader
-	 */
-	public ClassLoader getClassLoader() {
-		return classLoader;
+	public String getConfigMethod() {
+		return configMethod;
 	}
 }

@@ -11,27 +11,24 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Properties;
+import java.util.NoSuchElementException;
 import java.util.Set;
+
+import org.testng.annotations.DataProvider;
 
 import net.sf.extcos.ComponentQuery;
 import net.sf.extcos.ComponentScanner;
 import net.sf.testng.databinding.core.error.ErrorCollector;
 import net.sf.testng.databinding.core.error.MissingPropertiesException;
 import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
-import net.sf.testng.databinding.core.error.UnsupportedDataSourceException;
-import net.sf.testng.databinding.core.properties.DoNothingPropertiesPrefixPreprocessor;
-import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
+import net.sf.testng.databinding.core.model.Configuration;
 import net.sf.testng.databinding.core.util.Annotations;
-import net.sf.testng.databinding.core.util.MethodParametersAndPropertiesConstructorMatcher;
+import net.sf.testng.databinding.core.util.MethodParametersAndConfigurationConstructorMatcher;
 import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.BasePackageLoader;
 import net.sf.testng.databinding.util.ConstructorMatcher;
 import net.sf.testng.databinding.util.Constructors;
 import net.sf.testng.databinding.util.MethodParameter;
-import net.sf.testng.databinding.util.PropertiesUtil;
-
-import org.testng.annotations.DataProvider;
 
 /**
  * The GenericDataProvider class is the main entry point for the TestNG Data Binding framework. It
@@ -56,28 +53,6 @@ import org.testng.annotations.DataProvider;
  * data as required. Which types of data are permissible for test input and test output parameters
  * depends on the data source used.
  * <p>
- * To specify which data source the data for a test method will come from you need to define a
- * .data.properties file. The default convention is that this file will have the same name as the
- * test class containing the test method using it and that it resides right next to that class in
- * the package / folder hierarchy. So assuming your test class is <code>foo.bar.SampleTest</code>
- * the .data.properties file would be <code>/foo/bar/SampleTest.data.properties</code>.
- * <p>
- * The .data.properties file for a test class contains the data source specifications for all test
- * methods within that class using the TestNG Data Binding framework. Property key prefixes are used
- * to differentiate between the various specifications. The default prefix is the test method's name
- * that particular specification pertains to.
- * <p>
- * However both location and name of the .data.properties file and the property key prefix for a
- * method can be specified explicitly by annotating the test method with @{@link DataBinding} and
- * setting the parameters it provides.
- * <p>
- * The keys making up a particular data source specification and which of those keys may be required
- * or optional depends on the data source used. The only commonly required key is
- * <code>dataSource</code> defining the kind of data source which the test data is to be retrieved from.
- * Possible values for currently supported data sources are <code>csv, csv-file-at-once, properties</code>
- * and <code>xml</code>. For more on data sources and their names see {@link IDataSource} and
- * {@link DataSource}.
- * <p>
  * Since the various data sources are organized as plug-ins for the TestNG Data Binding
  * framework, make sure you've got the ones you need on your build path or dependencies list
  * alongside the core component.
@@ -88,11 +63,6 @@ public class GenericDataProvider {
 	private static class DataSourcesMap extends HashMap<String, Class<? extends IDataSource>> {
 		private static final long serialVersionUID = -1357728940375321662L;
 	}
-
-	private static final String DATA_SOURCE_KEY = "dataSource";
-
-	@Deprecated
-	private static final String STRATEGY_KEY = "strategy";
 
 	private static DataSourcesMap dataSources;
 
@@ -152,30 +122,53 @@ public class GenericDataProvider {
 		checkConfiguration(parameters);
 
 		Class<?> declaringClass = method.getDeclaringClass();
-		String propertiesPrefix = method.getName();
-
-		if (method.isAnnotationPresent(DataBinding.class)) {
-			final DataBinding dataBinding = method.getAnnotation(DataBinding.class);
-
-			if (dataBinding.declaringClass() != Object.class && dataBinding.declaringClass() != declaringClass) {
-				declaringClass = dataBinding.declaringClass();
+		String configMethod = method.getName() + "Config";
+		String dataSource = null;
+		Class<?> configClass = null;
+		
+		if (declaringClass.isAnnotationPresent(DataBinding.class)) {
+			DataBinding dataBinding = declaringClass.getAnnotation(DataBinding.class);
+			
+			if (!"".equals(dataBinding.dataSource())) {
+				dataSource = dataBinding.dataSource();
 			}
-
-			if (!"".equals(dataBinding.propertiesPrefix()) && !propertiesPrefix.equals(dataBinding.propertiesPrefix())) {
-				propertiesPrefix = dataBinding.propertiesPrefix();
-			}
-
-			if (dataBinding.prefixPreprocessor() != DoNothingPropertiesPrefixPreprocessor.class) {
-				PropertiesPrefixPreprocessor preprocessor = dataBinding.prefixPreprocessor().newInstance();
-				propertiesPrefix = preprocessor.process(propertiesPrefix);
+			
+			if (!Object.class.equals(dataBinding.configClass())) {
+				configClass = dataBinding.configClass();
 			}
 		}
-
-		propertiesPrefix += ".";
-		final Properties dataProperties = loadDataProperties(declaringClass, propertiesPrefix);
-		checkProperties(dataProperties);
-
-		return getDataSource(parameters, dataProperties);
+		
+		if (method.isAnnotationPresent(DataBinding.class)) {
+			DataBinding dataBinding = method.getAnnotation(DataBinding.class);
+			
+			if (!"".equals(dataBinding.dataSource())) {
+				dataSource = dataBinding.dataSource();
+			}
+			
+			if (!Object.class.equals(dataBinding.configClass())) {
+				configClass = dataBinding.configClass();
+			}
+			
+			if (!"".equals(dataBinding.configMethod())) {
+				configMethod = dataBinding.configMethod();
+			}
+		}
+		
+		List<String> missingKeys = new ArrayList<String>();
+		
+		if (dataSource == null) {
+			missingKeys.add("dataSource");
+		}
+		
+		if (configClass == null) {
+			missingKeys.add("configClass");
+		}
+		
+		if (missingKeys.size() > 0) {
+			throw new MissingPropertiesException(missingKeys);
+		}
+		
+		return getDataSource(parameters, dataSource, configClass, configMethod);
 	}
 
 	private static void checkConfiguration(final List<MethodParameter> parameters) {
@@ -229,41 +222,20 @@ public class GenericDataProvider {
 		}
 	}
 
-	private static Properties loadDataProperties(final Class<?> declaringClass, final String propertiesPrefix)
-			throws Exception {
-		final Properties properties = new Properties();
-		properties.load(declaringClass.getResourceAsStream(getDataPropertiesFile(declaringClass)));
-		return PropertiesUtil.removeKeyPrefix(properties, propertiesPrefix);
-	}
-
-	private static String getDataPropertiesFile(final Class<?> declaringClass) {
-		return "/" + declaringClass.getName().replaceAll("\\.", "/") + ".data.properties";
-	}
-
-	private static void checkProperties(final Properties dataProperties) {
-		if (!dataProperties.containsKey(DATA_SOURCE_KEY)) {
-			if (dataProperties.containsKey(STRATEGY_KEY)) {
-				throw new MissingPropertiesException(DATA_SOURCE_KEY + " (You provided the " + STRATEGY_KEY
-						+ " property which has been deprecated. Please use the " + DATA_SOURCE_KEY
-						+ " property instead.)");
-			}
-			throw new MissingPropertiesException(DATA_SOURCE_KEY);
-		}
-
-		final String dataSource = dataProperties.getProperty(DATA_SOURCE_KEY).toLowerCase();
-
-		if (!getDataSources().containsKey(dataSource)) {
-			throw new UnsupportedDataSourceException(dataProperties.getProperty(DATA_SOURCE_KEY));
-		}
-	}
-
-	private static IDataSource getDataSource(final List<MethodParameter> parameters, final Properties dataProperties)
+	private static IDataSource getDataSource(final List<MethodParameter> parameters,
+			final String dataSource, final Class<?> configClass, final String configMethod)
 			throws Exception {
 		final Class<? extends IDataSource> dataSourceClass = getDataSources().get(
-			dataProperties.getProperty(DATA_SOURCE_KEY).toLowerCase());
-		final ConstructorMatcher matcher = new MethodParametersAndPropertiesConstructorMatcher();
+			dataSource.toLowerCase());
+		
+		if (dataSourceClass == null) {
+			throw new NoSuchElementException("The data source [" + dataSource
+					+ "] couldn't be found.");
+		}
+		
+		final ConstructorMatcher matcher = new MethodParametersAndConfigurationConstructorMatcher();
 		final Constructor<IDataSource> constructor = Constructors.getMatchingConstructor(dataSourceClass, matcher);
-		return constructor.newInstance(parameters, dataProperties);
+		return constructor.newInstance(parameters, new Configuration(configClass, configMethod));
 	}
 
 	private static List<MethodParameter> createMethodParameters(final Method method) {

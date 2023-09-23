@@ -3,19 +3,19 @@ package net.sf.testng.databinding.core.util;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Properties;
 
+import net.sf.testng.databinding.core.model.Configuration;
 import net.sf.testng.databinding.util.ConstructorMatcher;
 import net.sf.testng.databinding.util.MethodParameter;
 
 /**
  * This class implements a {@link ConstructorMatcher} matching constructors taking 2 parameters:
- * <code>{@link List}&lt;{@link MethodParameter}&gt;</code> and <code>{@link Properties}</code>, in
+ * <code>{@link List}&lt;{@link MethodParameter}&gt;</code> and <code>{@link Configuration}</code>, in
  * that order.
  * 
  * @author Matthias Rothe
  */
-public class MethodParametersAndPropertiesConstructorMatcher implements ConstructorMatcher {
+public class MethodParametersAndConfigurationConstructorMatcher implements ConstructorMatcher {
 
 	/**
 	 * {@inheritDoc}
@@ -30,7 +30,8 @@ public class MethodParametersAndPropertiesConstructorMatcher implements Construc
 			final Type[] typeArguments = firstParam.getActualTypeArguments();
 
 			if (firstParam.getRawType() == List.class && typeArguments.length == 1
-					&& typeArguments[0] == MethodParameter.class && parameterTypes[1] == Properties.class) {
+					&& typeArguments[0] == MethodParameter.class
+					&& parameterTypes[1] == Configuration.class) {
 				return true;
 			}
 		}

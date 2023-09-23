@@ -1,15 +1,11 @@
 package net.sf.testng.databinding.core.util;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Set;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
-import net.sf.extcos.ComponentQuery;
-import net.sf.extcos.ComponentScanner;
-import net.sf.testng.databinding.DataSourceConfiguration;
 import net.sf.testng.databinding.core.model.Configuration;
+import net.sf.testng.databinding.util.Exceptions;
 
 public class DataSourceConfigurationLoader {
 	private DataSourceConfigurationLoader() {
@@ -17,56 +13,22 @@ public class DataSourceConfigurationLoader {
 
 	public static <T> T loadDataSourceConfiguration(final Configuration configuration,
 			Class<? extends T> configurationInterfaceClass) {
-		Thread currentThread = Thread.currentThread();
-		
-		ClassLoader classLoader = currentThread.getContextClassLoader();
-		currentThread.setContextClassLoader(configuration.getClassLoader());
-		
-		ComponentScanner scanner = new ComponentScanner();
-
-		Set<Class<?>> candidateClasses = scanner.getClasses(new ComponentQuery() {
-
-			@Override
-			protected void query() {
-				select().from(configuration.getBasePackages()).returning(
-						allBeing(and(implementorOf(configurationInterfaceClass),
-								annotatedWith(DataSourceConfiguration.class)
-						))
-				);
-			}
-		});
-
-		currentThread.setContextClassLoader(classLoader);
-		
-		Class<?> configObjectClass = null;
-		
-		for (Class<?> candidateClass : candidateClasses) {
-			DataSourceConfiguration dataSourceConfiguration =
-					candidateClass.getAnnotation(DataSourceConfiguration.class);
+		try {
+			Class<?> configObjectClass = configuration.getConfigClass();
+			Method method = configObjectClass.getDeclaredMethod(configuration.getConfigMethod(),
+					(Class<?>[]) null);
+			int modifiers = method.getModifiers();
 			
-			if (Objects.equals(dataSourceConfiguration.name(), configuration.getConfigName())) {
-				configObjectClass = candidateClass;
-				break;
+			if ((modifiers & Modifier.PUBLIC) > 0 && (modifiers & Modifier.STATIC) > 0
+					&& method.getReturnType().equals(configurationInterfaceClass)) {
+				return configurationInterfaceClass.cast(method.invoke(null, (Object[]) null));
+			} else {
+				throw new NoSuchMethodException("The specified configuration method is not "
+						+ "public static or returns the wrong type.");
 			}
-		}
-		
-		if (configObjectClass != null) {
-			try {
-				Object configObject = configObjectClass.getConstructor().newInstance();
-				return configurationInterfaceClass.cast(configObject);
-			} catch (InvocationTargetException | InstantiationException | IllegalAccessException
-					| IllegalArgumentException | NoSuchMethodException | SecurityException |
-					NullPointerException e) {
-				throw new NoSuchElementException("Couldn't find or invoke default no-args "
-						+ "constructor on class " + configObjectClass.getCanonicalName(), e);
-			}
-		} else {
-			throw new NoSuchElementException("A class implementing "
-					+ configurationInterfaceClass.getCanonicalName() + " annotated with "
-					+ "@DataSourceConfiguration(name = \"" + configuration.getConfigName()
-					+ "\") could not be found in base packages "
-					+ Arrays.toString(configuration.getBasePackages())
-					+ " or any subpackages.");
-		}
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException
+				| IllegalArgumentException | InvocationTargetException e) {
+			throw Exceptions.softenIfNecessary(e);
+		}		
 	}
 }

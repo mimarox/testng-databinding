@@ -156,4 +156,19 @@ public interface CsvDataSourceConfiguration {
 	default String getLinkingColumnPrefix() {
 		return "link_";
 	}
+
+	/**
+	 * Retrieves the configuration object for the given linkKey.
+	 * <p>
+	 * This method MUST be overridden when using the {@link HeaderNameFileLinkingMapper}.
+	 * Otherwise it is ignored.
+	 * <p>
+	 * Defaults to <code>null</code>
+	 * 
+	 * @param linkKey
+	 * @return
+	 */
+	default CsvDataSourceConfiguration getConfiguration(String linkKey) {
+		return null;
+	}
 }

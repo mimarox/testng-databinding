@@ -7,7 +7,7 @@
 	</parent>
 	<groupId>net.sf.testngdatabind</groupId>
 	<artifactId>testng-databinding</artifactId>
-	<version>2.1-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>TestNG DataBinding Parent POM</name>
 	<description>Parent POM for a data binding framework targeting TestNG</description>
@@ -21,9 +21,9 @@
 	</licenses>
 	<inceptionYear>2010</inceptionYear>
 	<scm>
-		<connection>scm:svn:http://svn.code.sf.net/p/testngdatabind/code/trunk</connection>
-		<developerConnection>scm:svn:https://svn.code.sf.net/p/testngdatabind/code/trunk</developerConnection>
-		<url>https://sourceforge.net/p/testngdatabind/code/</url>
+		<connection>scm:git:https://github.cm/mimarox/testng-databinding.git</connection>
+		<developerConnection>scm:git:https://github.cm/mimarox/testng-databinding.git</developerConnection>
+		<url>https://github.com/mimarox/testng-databinding</url>
 	</scm>
 	<developers>
 		<developer>
@@ -34,16 +34,16 @@
 		</developer>
 	</developers>
 	<properties>
-		<javadoc.title>TestNG Data Binding 2.0 API</javadoc.title>
+		<javadoc.title>TestNG Data Binding 3.0.0 API</javadoc.title>
 	</properties>
 	<build>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.11.0</version>
 				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
+					<source>11</source>
+					<target>11</target>
 				</configuration>
 			</plugin>
 			<plugin>

@@ -8,7 +8,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,9 +30,10 @@ import net.sf.testng.databinding.IDataSource;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.core.error.ErrorCollector;
-import net.sf.testng.databinding.core.error.MissingPropertiesException;
 import net.sf.testng.databinding.core.error.MultipleConfigurationErrorsException;
 import net.sf.testng.databinding.core.error.MultipleSourceErrorsException;
+import net.sf.testng.databinding.core.model.Configuration;
+import net.sf.testng.databinding.core.util.DataSourceConfigurationLoader;
 import net.sf.testng.databinding.core.util.Types;
 import net.sf.testng.databinding.util.Exceptions;
 import net.sf.testng.databinding.util.MethodParameter;
@@ -48,45 +48,6 @@ import net.sf.testng.databinding.util.MethodParameter;
  * except {@link Enum Enums}.
  * </p>
  * <h3>Specifications</h3>
- * <h4>Data Properties</h4>
- * <p>
- * The following table gives an overview of the required and optional data property keys for this
- * data source.
- * </p><p>
- * <table border="1">
- * <tr>
- * <td><b>Key</b></td>
- * <td><b>Possible Values</b></td>
- * <td><b>Default Value</b></td>
- * <td><b>Description</b></td>
- * <td><b>Required</b></td>
- * </tr>
- * <tr>
- * <td>dataSource</td>
- * <td><code>xml</code></td>
- * <td>N/A</td>
- * <td>The name of this data source</td>
- * <td>Yes</td>
- * </tr>
- * <tr>
- * <td>url</td>
- * <td>A {@link URL} conformant {@link String} for an absolute<br>
- * locator or a relative path starting with a<br>
- * slash (/)</td>
- * <td>N/A</td>
- * <td>The locator of the actual data source file</td>
- * <td>Yes</td>
- * </tr>
- * <tr>
- * <td>encoding</td>
- * <td>Any name of a supported charset<br>
- * (e.g. UTF-8, ISO-8859-1, or US-ASCII)</td>
- * <td>UTF-8</td>
- * <td>The encoding of the data source file</td>
- * <td>No</td>
- * </tr>
- * </table>
- * </p>
  * <h4>XML Data Files</h4>
  * <p>
  * The format of the XML files to be bound needs to adhere to these rules:
@@ -381,7 +342,7 @@ public class XMLDataSource extends AbstractDataSource {
 	private final List<MethodParameter> inputParameters = new ArrayList<MethodParameter>();
 	private final List<MethodParameter> outputParameters = new ArrayList<MethodParameter>();
 	private final XMLStreamReader xmlReader;
-	private final Properties properties;
+	private final XMLDataSourceConfiguration configuration;
 	private InputStream urlStream;
 	private List<MethodParameter> parameters;
 	private boolean usesDataSetTag;
@@ -395,11 +356,15 @@ public class XMLDataSource extends AbstractDataSource {
 	 * @param properties The properties describing where to load the data from
 	 * @throws Exception If anything goes wrong during the creation of this instance
 	 */
-	public XMLDataSource(final List<MethodParameter> parameters, final Properties properties) throws Exception {
+	public XMLDataSource(final List<MethodParameter> parameters,
+			final Configuration configuration) throws Exception {
 		boolean cleanUpNecessary = true;
 		try {
-			checkProperties(properties);
-			this.properties = properties;
+			XMLDataSourceConfiguration dataSourceConfiguration =
+					DataSourceConfigurationLoader.loadDataSourceConfiguration(configuration,
+							XMLDataSourceConfiguration.class);
+			
+			this.configuration = dataSourceConfiguration;
 
 			setParameters(parameters);
 
@@ -412,39 +377,15 @@ public class XMLDataSource extends AbstractDataSource {
 		}
 	}
 
-	private void checkProperties(final Properties properties) {
-		final List<String> missingKeys = new ArrayList<String>();
-
-		if (!properties.containsKey("url")) {
-			missingKeys.add("url");
-		}
-
-		if (missingKeys.size() > 0) {
-			throw new MissingPropertiesException(missingKeys);
-		}
-	}
-
 	private XMLStreamReader createXmlReader() throws Exception {
-		final URL url = resolveUrl(properties.getProperty("url"));
+		final URL url = configuration.getURL();
 		urlStream = url.openStream();
 
 		final XMLInputFactory factory = XMLInputFactory.newInstance();
 		final XMLStreamReader xmlReader = factory.createXMLStreamReader(urlStream,
-			properties.getProperty("encoding", "UTF-8"));
+			configuration.getEncoding());
 
 		return xmlReader;
-	}
-
-	private URL resolveUrl(final String urlString) {
-		URL url;
-
-		try {
-			url = new URL(urlString);
-		} catch (final MalformedURLException e) {
-			url = getClass().getResource(urlString);
-		}
-
-		return url;
 	}
 
 	private void checkDataSource() {
@@ -690,7 +631,7 @@ public class XMLDataSource extends AbstractDataSource {
 			final BeanInfo info = Introspector.getBeanInfo(clazz);
 			final List<PropertyDescriptor> remainingCandidates = filterCandidateProperties(info
 				.getPropertyDescriptors());
-			final Object bean = clazz.newInstance();
+			final Object bean = clazz.getConstructor().newInstance();
 
 			for (xmlReader.next(); !reachedEndOfBeanSection(clazz, beanName, xmlReader); parseNextInBeanIfNecessary(
 				clazz, beanName, xmlReader)) {
@@ -913,8 +854,8 @@ public class XMLDataSource extends AbstractDataSource {
 
 	private MultipleSourceErrorsException genericSourceErrorsException(final String detailMessage) {
 		final Location location = xmlReader.getLocation();
-		final ErrorCollector errorCollector = new ErrorCollector(properties.getProperty("url"));
-		errorCollector.addError("invalid source for data provider strategy " + getClass().getName() + " at ["
+		final ErrorCollector errorCollector = new ErrorCollector(configuration.getURL().toExternalForm());
+		errorCollector.addError("invalid source for data source " + getClass().getName() + " at ["
 				+ location.getLineNumber() + ":" + location.getColumnNumber() + "]" + ", current parse event: "
 				+ eventCodeToText(xmlReader.getEventType())
 				+ (detailMessage != null ? ", detail message: " + detailMessage : ""));

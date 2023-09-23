@@ -6,18 +6,19 @@ import static org.testng.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Properties;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import net.sf.testng.databinding.GenericDataProvider;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
+import net.sf.testng.databinding.core.model.Configuration;
 import net.sf.testng.databinding.properties.beans.NestingTestBean;
 import net.sf.testng.databinding.properties.beans.TestBean;
 import net.sf.testng.databinding.properties.beans.TestEnum;
+import net.sf.testng.databinding.properties.datasource.config.PropertiesDataSourceConfigurations;
 import net.sf.testng.databinding.util.MethodParameter;
-
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
 
 public class PropertiesDataSourceTest {
 	private Method methodParametersCreator;
@@ -32,10 +33,8 @@ public class PropertiesDataSourceTest {
 	public void testPrimitiveValues() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("primitivesConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/primitive.properties");
-
-		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters,
+				new Configuration(PropertiesDataSourceConfigurations.class, "primitiveValuesConfig"));
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { "Hello World!", 0.6 });
@@ -46,10 +45,8 @@ public class PropertiesDataSourceTest {
 	public void testPrimitivesAndEnum() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("primitivesAndEnumConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/primitivesAndEnum.properties");
-
-		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters,
+				new Configuration(PropertiesDataSourceConfigurations.class, "primitivesAndEnumConfig"));
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { 5, TestEnum.one, true });
@@ -60,10 +57,8 @@ public class PropertiesDataSourceTest {
 	public void testBeanAllValuesSet() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("beanConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/beanAllValuesSet.properties");
-
-		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters,
+				new Configuration(PropertiesDataSourceConfigurations.class, "beanAllValuesSetConfig"));
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { new TestBean("Hello World!", 10, 5.3f, TestEnum.one) });
@@ -74,10 +69,8 @@ public class PropertiesDataSourceTest {
 	public void testBeanSomeValuesSet() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("beanConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/beanSomeValuesSet.properties");
-
-		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters,
+				new Configuration(PropertiesDataSourceConfigurations.class, "beansSomeValuesSetConfig"));
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { new TestBean("Hello World!", 0, 5.3f, null) });
@@ -88,10 +81,8 @@ public class PropertiesDataSourceTest {
 	public void testNestingTestBean() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("nestingBeanConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/beanAllValuesSet.properties");
-
-		final PropertiesDataSource provider = new PropertiesDataSource(parameters, properties);
+		final PropertiesDataSource provider = new PropertiesDataSource(parameters,
+				new Configuration(PropertiesDataSourceConfigurations.class, "beanAllValuesSetConfig"));
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { new NestingTestBean("Hello World!", new TestBean("Hello World!",

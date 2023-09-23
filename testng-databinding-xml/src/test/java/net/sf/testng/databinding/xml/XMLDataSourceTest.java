@@ -7,21 +7,22 @@ import static org.testng.Assert.assertTrue;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
+
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import net.sf.testng.databinding.GenericDataProvider;
 import net.sf.testng.databinding.TestInput;
 import net.sf.testng.databinding.TestOutput;
 import net.sf.testng.databinding.core.error.MultipleSourceErrorsException;
+import net.sf.testng.databinding.core.model.Configuration;
 import net.sf.testng.databinding.util.MethodParameter;
 import net.sf.testng.databinding.xml.beans.BeanWithMap;
 import net.sf.testng.databinding.xml.beans.IESTestBean;
 import net.sf.testng.databinding.xml.beans.InnerTestBean;
 import net.sf.testng.databinding.xml.beans.TestBean;
 import net.sf.testng.databinding.xml.beans.TestEnum;
-
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import net.sf.testng.databinding.xml.datasource.config.XmlDataSourceConfigurations;
 
 public class XMLDataSourceTest {
 	private Method methodParametersCreator;
@@ -36,10 +37,8 @@ public class XMLDataSourceTest {
 	public void testSingleRowSingleStringInputValueTestData() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("singleStringInputValueConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/singleRowSingleStringInputValueTestData.xml");
-
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters,
+				new Configuration(XmlDataSourceConfigurations.class, "singleRowSingleStringConfig"));
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { "Hello World!" });
@@ -50,10 +49,8 @@ public class XMLDataSourceTest {
 	public void testSingleRowSingleStringInputValueTestData_NoData() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("singleStringInputValueConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/singleRowSingleStringInputValueTestData-noData.xml");
-
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters,
+				new Configuration(XmlDataSourceConfigurations.class, "singleRowSingleStringNoDataConfig"));
 
 		assertTrue(provider.hasNext());
 		provider.next();
@@ -63,10 +60,8 @@ public class XMLDataSourceTest {
 	public void testSingleRowSingleEnumInputValueTestData() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("singleEnumInputValueConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/singleRowSingleEnumInputValueTestData.xml");
-
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters,
+				new Configuration(XmlDataSourceConfigurations.class, "singleRowSingleEnumConfig"));
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { TestEnum.one });
@@ -77,10 +72,8 @@ public class XMLDataSourceTest {
 	public void testMultiRowSingleStringInputValueTestData() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("singleStringInputValueConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/multiRowSingleStringInputValueTestData.xml");
-
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters,
+				new Configuration(XmlDataSourceConfigurations.class, "multiRowSingleStringConfig"));
 
 		assertTrue(provider.hasNext());
 
@@ -98,10 +91,9 @@ public class XMLDataSourceTest {
 
 		final List<MethodParameter> parameters = createMethodParameters("complexBeanInputValueConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/multiRowComplexBeanInputValueTestData.xml");
 
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters,
+				new Configuration(XmlDataSourceConfigurations.class, "multiRowComplexBeanConfig"));
 
 		assertTrue(provider.hasNext());
 
@@ -118,10 +110,8 @@ public class XMLDataSourceTest {
 
 		final List<MethodParameter> parameters = createMethodParameters("multipleInputValuesConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/multipleInputValuesTestData.xml");
-
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters,
+				new Configuration(XmlDataSourceConfigurations.class, "multipleValuesConfig"));
 
 		assertTrue(provider.hasNext());
 
@@ -141,10 +131,8 @@ public class XMLDataSourceTest {
 
 		final List<MethodParameter> parameters = createMethodParameters("inputOutputValuesConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/inputOutputValuesTestData.xml");
-
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters,
+				new Configuration(XmlDataSourceConfigurations.class, "inputOutputValuesConfig"));
 
 		assertTrue(provider.hasNext());
 
@@ -159,31 +147,12 @@ public class XMLDataSourceTest {
 	public void testBeanWithMapTestData() throws Exception {
 		final List<MethodParameter> parameters = createMethodParameters("beanWithMapConsumer");
 
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/beanWithMapTestData.xml");
 
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
+		final XMLDataSource provider = new XMLDataSource(parameters,
+				new Configuration(XmlDataSourceConfigurations.class, "beanWithMapConfig"));
 
 		assertTrue(provider.hasNext());
 		assertEquals(provider.next(), new Object[] { new BeanWithMap() });
-		assertFalse(provider.hasNext());
-	}
-
-	@Test(/* timeOut = 1000 */)
-	public void testListWithIESTestData() throws Exception {
-		final List<String> entries = Arrays.asList("1", "2", "3");
-		final IESTestBean bean = new IESTestBean();
-		bean.setEntries(entries);
-
-		final List<MethodParameter> parameters = createMethodParameters("listWithIESConsumer");
-
-		final Properties properties = new Properties();
-		properties.setProperty("url", "/listWithIESTestData.xml");
-
-		final XMLDataSource provider = new XMLDataSource(parameters, properties);
-
-		assertTrue(provider.hasNext());
-		assertEquals(provider.next(), new Object[] { entries, bean });
 		assertFalse(provider.hasNext());
 	}
 

@@ -1,8 +1,8 @@
 package net.sf.testng.databinding.util;
 
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-
-import java.util.NoSuchElementException;
+import static org.testng.Assert.fail;
 
 import org.testng.annotations.Test;
 
@@ -14,32 +14,19 @@ public class DataSourceConfigurationLoaderTest {
 	@Test
 	public void loadDataSourceConfiguration() {
 		assertNotNull(DataSourceConfigurationLoader.loadDataSourceConfiguration(
-				new Configuration("default", new String[] {
-						"net.sf.testng.databinding.util"
-				}, getClass().getClassLoader()), CsvDataSourceConfiguration.class));
+				new Configuration(CsvConfigObject.class, "defaultConfig"),
+				CsvDataSourceConfiguration.class));
 	}
 	
-	@Test(expectedExceptions = NoSuchElementException.class)
-	public void shouldntFindConfigObjectWrongBasePackage() {
-		DataSourceConfigurationLoader.loadDataSourceConfiguration(
-				new Configuration("default", new String[] {
-						"net.sf.testng.databinding.util.foo.bar"
-				}, getClass().getClassLoader()), CsvDataSourceConfiguration.class);		
-	}
-	
-	@Test(expectedExceptions = NoSuchElementException.class)
+	@Test
 	public void shouldntFindConfigObjectWrongConfigName() {
-		DataSourceConfigurationLoader.loadDataSourceConfiguration(
-				new Configuration("default-1", new String[] {
-						"net.sf.testng.databinding.util"
-				}, getClass().getClassLoader()), CsvDataSourceConfiguration.class);		
-	}
-	
-	@Test(expectedExceptions = NoSuchElementException.class)
-	public void shouldntLoadConfigObjectNoArgsConstructorMissing() {
-		DataSourceConfigurationLoader.loadDataSourceConfiguration(
-				new Configuration("no-args-constructor-missing", new String[] {
-						"net.sf.testng.databinding.util"
-				}, getClass().getClassLoader()), CsvDataSourceConfiguration.class);		
+		try {
+			DataSourceConfigurationLoader.loadDataSourceConfiguration(
+					new Configuration(CsvConfigObject.class, "default-1"),
+					CsvDataSourceConfiguration.class);
+			fail("Shouldn't have found method default-1");
+		} catch (RuntimeException e) {
+			assertEquals(e.getCause().getClass(), NoSuchMethodException.class);
+		}
 	}
 }

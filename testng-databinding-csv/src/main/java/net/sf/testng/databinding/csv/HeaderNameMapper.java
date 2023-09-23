@@ -83,11 +83,12 @@ public class HeaderNameMapper extends Mapper {
 	 * @param parameters The test method parameters
 	 * @param properties The configuration properties
 	 */
-	public HeaderNameMapper(List<MethodParameter> parameters, Properties properties) {
-		super(parameters, properties);
+	public HeaderNameMapper(List<MethodParameter> parameters,
+			CsvDataSourceConfiguration configuration) {
+		super(parameters, configuration);
 
-		this.inputColumnPrefix = properties.getProperty("inputColumnPrefix", "in_");
-		this.outputColumnPrefix = properties.getProperty("outputColumnPrefix", "out_");
+		this.inputColumnPrefix = configuration.getInputColumnPrefix();
+		this.outputColumnPrefix = configuration.getOutputColumnPrefix();
 
 		for (MethodParameter parameter : parameters) {
 			if (parameter.getAnnotation(TestInput.class) != null) {
@@ -367,7 +368,7 @@ public class HeaderNameMapper extends Mapper {
 	protected Object createSingleBean(MethodParameter parameter, String[] line, String prefix) {
 		try {
 			Class<?> clazz = (Class<?>) parameter.getType();
-			Object object = clazz.newInstance();
+			Object object = clazz.getConstructor().newInstance();
 			BeanInfo info = Introspector.getBeanInfo(clazz);
 
 			for (PropertyDescriptor descriptor : info.getPropertyDescriptors()) {

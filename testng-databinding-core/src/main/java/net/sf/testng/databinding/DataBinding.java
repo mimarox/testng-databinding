@@ -4,10 +4,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-
-import net.sf.testng.databinding.core.properties.DoNothingPropertiesPrefixPreprocessor;
-import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
 
 /**
  * Annotation for TestNG <a href="http://testng.org/javadocs/org/testng/annotations/Test.html" target="_blank">&#64;Test</a>
@@ -26,13 +22,15 @@ import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
  * </pre>
  * <p>
  * This annotation can also be used at class level. If used at class level it applies to all
- * test methods in the class so annotated. Any settings of this annotation's parameters will be
- * ignored if used at class level and defaults will be used. If parameter values other than the
- * defaults are needed for any test method in a test class annotated with this annotation that
- * test method needs to also be annotated with this annotation specifying the parameters as needed.
+ * test methods in the class so annotated. Only the {@link #dataSource()} and the
+ * {@link #configClass()} can be configured on the class level. If parameter values other than the
+ * default for the {@link #configMethod()} and the values set on the class level are needed for any
+ * test method in a test class annotated with this annotation that test method needs to also be
+ * annotated with this annotation specifying the parameters as needed. Values set on the method level
+ * always override those set on the class level.
  * <p>
- * Join the <a href="http://facebook.com/TestNGDataBinding" target="_blank">TestNG Data Binding community on Facebook</a> to always stay up to date and discuss issues
- * with other users!
+ * Join the <a href="http://facebook.com/TestNGDataBinding" target="_blank">TestNG Data Binding
+ * community on Facebook</a> to always stay up to date and discuss issues with other users!
  * 
  * @author Matthias Rothe
  * @see GenericDataProvider
@@ -43,36 +41,46 @@ import net.sf.testng.databinding.core.properties.PropertiesPrefixPreprocessor;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DataBinding {
 	/**
-	 * The class this test method belongs to or should be deemed to belong to.
+	 * Sets the data source.
 	 * <p>
-	 * Data properties file resolution depends upon that class's full name. For example if the
-	 * declaring class is <code>foo.bar.SampleTest</code> then the data properties file has to be
-	 * accessible under <code>/foo/bar/SampleTest.data.properties</code>.
+	 * May be the name of any data source available on the class path. See the individual
+	 * data sources for the name their identified by.
 	 * <p>
-	 * If not specified the declaring class will be retrieved by calling
-	 * {@link Method#getDeclaringClass()} on the test method.
+	 * This parameter may be set on the class level or the method level. If set on both, the
+	 * value set on the method level takes precedence.
+	 * 
+	 * @return the data source
 	 */
-	public Class<?> declaringClass() default Object.class;
-
+	String dataSource() default "";
+	
 	/**
-	 * The prefix of the data properties for this test method.
+	 * Sets the class containing the <code>public static</code> methods returning the configuration
+	 * objects for the chosen {@link #dataSource()}.
 	 * <p>
-	 * To distinguish between the properties belonging to the test methods of one
-	 * {@link #declaringClass() declaring class} those properties need a common prefix per test
-	 * method. It is expected that this prefix is followed by a dot (.). This dot must be omitted in
-	 * the prefix.
-	 * <p>
-	 * If not specified the prefix will default to the method's name.
+	 * This parameter may be set on the class level or the method level. If set on both, the
+	 * value set on the method level takes precedence.
+	 * 
+	 * @return the configuration class
 	 */
-	public String propertiesPrefix() default "";
-
+	Class<?> configClass() default Object.class;
+	
 	/**
-	 * The class of the object to be used to dynamically change the properties prefix, before
-	 * this prefix is used.
+	 * Sets the name of the method returning the configuration object for the chosen
+	 * {@link #dataSource()}.
 	 * <p>
-	 * The given class must have a no-args constructor.
+	 * MUST be the name of any <code>public static</code> no-args method implemented within the
+	 * set {@link #configClass()}. This method MUST have the return type set to the configuration
+	 * object type of the chosen {@link #dataSource()}. See the individual data source implementations
+	 * to find out which configuration object type they provide and expect to get returned.
 	 * <p>
-	 * If not specified, the properties prefix will be used without preprocessing.
+	 * This parameter may only be set on the method level. If set on the class level, it is silently
+	 * ignored.
+	 * <p>
+	 * Defaults to &lt;name of the annotated test method&gt;Config. So if the annotated test method
+	 * is called 'foo', the default configMethod will be 'public static &lt;return type&gt;
+	 * <strong>fooConfig</strong>()'. 
+	 * 
+	 * @return the configuration method's name
 	 */
-	public Class<? extends PropertiesPrefixPreprocessor> prefixPreprocessor() default DoNothingPropertiesPrefixPreprocessor.class;
+	String configMethod() default "";
 }
