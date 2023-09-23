@@ -1,13 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<parent>
-		<groupId>org.sonatype.oss</groupId>
-		<artifactId>oss-parent</artifactId>
-		<version>7</version>
-	</parent>
 	<groupId>net.sf.testngdatabind</groupId>
 	<artifactId>testng-databinding</artifactId>
-	<version>3.0.0</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>TestNG DataBinding Parent POM</name>
 	<description>Parent POM for a data binding framework targeting TestNG</description>
@@ -22,9 +19,16 @@
 	<inceptionYear>2010</inceptionYear>
 	<scm>
 		<connection>scm:git:https://github.cm/mimarox/testng-databinding.git</connection>
-		<developerConnection>scm:git:https://github.cm/mimarox/testng-databinding.git</developerConnection>
+		<developerConnection>
+			scm:git:https://github.cm/mimarox/testng-databinding.git</developerConnection>
 		<url>https://github.com/mimarox/testng-databinding</url>
 	</scm>
+	<distributionManagement>
+		<snapshotRepository>
+			<id>ossrh</id>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 	<developers>
 		<developer>
 			<id>mimarox</id>
@@ -55,15 +59,28 @@
 					<groups>
 						<group>
 							<title>Core Packages</title>
-							<packages>net.sf.testng.databinding:net.sf.testng.databinding.core*:net.sf.testng.databinding.util</packages>
+							<packages>
+								net.sf.testng.databinding:net.sf.testng.databinding.core*:net.sf.testng.databinding.util</packages>
 						</group>
 						<group>
 							<title>Data Source Packages</title>
-							<packages>net.sf.testng.databinding.csv*:net.sf.testng.databinding.properties*:net.sf.testng.databinding.text*:net.sf.testng.databinding.xml*</packages>
+							<packages>
+								net.sf.testng.databinding.csv*:net.sf.testng.databinding.properties*:net.sf.testng.databinding.text*:net.sf.testng.databinding.xml*</packages>
 						</group>
 					</groups>
 					<overview>src/javadoc/overview-summary.html</overview>
-	                <additionalparam>-Xdoclint:none</additionalparam>
+					<additionalparam>-Xdoclint:none</additionalparam>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.5.3</version>
+				<configuration>
+					<autoVersionSubmodules>true</autoVersionSubmodules>
+					<useReleaseProfile>false</useReleaseProfile>
+					<releaseProfiles>release</releaseProfiles>
+					<goals>deploy</goals>
 				</configuration>
 			</plugin>
 		</plugins>
@@ -129,7 +146,8 @@
 								<configuration>
 									<failOnError>true</failOnError>
 									<target>
-										<exec executable="cmd" dir="." spawn="false">
+										<exec executable="cmd" dir="."
+											spawn="false">
 											<arg value="/c" />
 											<arg value="mvn.bat" />
 											<arg value="clean" />
@@ -138,7 +156,9 @@
 											<arg value="javadoc:aggregate" />
 											<arg value="-DperformRelease=true" />
 										</exec>
-										<exec executable="cmd" dir="./testng-databinding-delivery" spawn="false">
+										<exec executable="cmd"
+											dir="./testng-databinding-delivery"
+											spawn="false">
 											<arg value="/c" />
 											<arg value="mvn.bat" />
 											<arg value="assembly:single" />
@@ -147,6 +167,83 @@
 								</configuration>
 							</execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.10.2</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<!-- add this to disable checking -->
+							<doctitle>${javadoc.title}</doctitle>
+							<windowtitle>${javadoc.title}</windowtitle>
+							<groups>
+								<group>
+									<title>Core Packages</title>
+									<packages>
+										net.sf.testng.databinding:net.sf.testng.databinding.core*:net.sf.testng.databinding.util</packages>
+								</group>
+								<group>
+									<title>Data Source Packages</title>
+									<packages>
+										net.sf.testng.databinding.csv*:net.sf.testng.databinding.properties*:net.sf.testng.databinding.text*:net.sf.testng.databinding.xml*</packages>
+								</group>
+							</groups>
+							<overview>src/javadoc/overview-summary.html</overview>
+							<additionalparam>-Xdoclint:none</additionalparam>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.sonatype.plugins</groupId>
+						<artifactId>nexus-staging-maven-plugin</artifactId>
+						<version>1.6.13</version>
+						<extensions>true</extensions>
+						<configuration>
+							<serverId>ossrh</serverId>
+							<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+							<autoReleaseAfterClose>true</autoReleaseAfterClose>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>
